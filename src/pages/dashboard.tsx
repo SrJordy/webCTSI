@@ -1,8 +1,24 @@
 import { useEffect, useState } from "react";
 import MainLayout from "../layouts/MainLayout";
+import { motion } from "framer-motion";
+import { 
+    MdPerson, 
+    MdEmail, 
+    MdSecurity, 
+    MdCheckCircle,
+    MdExitToApp
+} from "react-icons/md";
+
+interface UserData {
+    nombre: string;
+    email: string;
+    rol: string;
+    estado: boolean;
+}
 
 const DashboardPage = () => {
-    const [userData, setUserData] = useState<any>(null);
+    const [userData, setUserData] = useState<UserData | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -13,41 +29,118 @@ const DashboardPage = () => {
             return;
         }
         setUserData(JSON.parse(user));
+        setIsLoading(false);
     }, []);
 
-    if (!userData) {
-        return <div>Cargando...</div>;
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = "/login";
+    };
+
+    if (isLoading) {
+        return (
+            <MainLayout>
+                <div className="flex items-center justify-center min-h-screen">
+                    <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-pastel-red"></div>
+                </div>
+            </MainLayout>
+        );
     }
+
 
     return (
         <MainLayout>
-            <div className="max-w-4xl mx-auto p-8 bg-white rounded-lg shadow-lg mt-16">
-            <h2 className="text-3xl font-semibold text-center text-pastel-red mb-6">
-                Bienvenido, {userData.nombre}
-            </h2>
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+            >
+                {/* Header Section */}
+                <div className="bg-gradient-to-r from-pastel-red to-red-400 rounded-2xl p-8 mb-8 text-white shadow-lg">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h1 className="text-4xl font-bold mb-2">
+                                Bienvenido, {userData?.nombre}
+                            </h1>
+                            <p className="text-red-100">
+                                Panel de Control | {userData?.rol}
+                            </p>
+                        </div>
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={handleLogout}
+                            className="flex items-center space-x-2 bg-white text-pastel-red px-4 py-2 rounded-lg hover:bg-red-50 transition-colors"
+                        >
+                            <MdExitToApp className="text-xl" />
+                            <span>Cerrar sesión</span>
+                        </motion.button>
+                    </div>
+                </div>
 
-            <div className="mb-4">
-                <h3 className="text-xl font-medium text-gray-700">Detalles del usuario</h3>
-                <p><strong>Correo electrónico:</strong> {userData.email}</p>
-                <p><strong>Rol:</strong> {userData.rol}</p>
-                <p><strong>Estado:</strong> {userData.estado ? "Activo" : "Inactivo"}</p>
-            </div>
-
-            <div className="mb-4">
-                <button
-                    onClick={() => {
-                        localStorage.removeItem("token");
-                        localStorage.removeItem("user");
-                        window.location.href = "/login"; // Cerrar sesión
-                    }}
-                    className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                
+                {/* User Details Card */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className="bg-white rounded-xl p-8 shadow-md"
                 >
-                    Cerrar sesión
-                </button>
-            </div>
-        </div>
+                    <h2 className="text-2xl font-bold mb-6 text-gray-800">
+                        Información del Usuario
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="flex items-center space-x-4">
+                            <div className="bg-red-100 p-3 rounded-lg">
+                                <MdPerson className="text-2xl text-pastel-red" />
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-500">Nombre</p>
+                                <p className="font-medium text-gray-800">{userData?.nombre}</p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center space-x-4">
+                            <div className="bg-red-100 p-3 rounded-lg">
+                                <MdEmail className="text-2xl text-pastel-red" />
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-500">Email</p>
+                                <p className="font-medium text-gray-800">{userData?.email}</p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center space-x-4">
+                            <div className="bg-red-100 p-3 rounded-lg">
+                                <MdSecurity className="text-2xl text-pastel-red" />
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-500">Rol</p>
+                                <p className="font-medium text-gray-800">{userData?.rol}</p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center space-x-4">
+                            <div className="bg-red-100 p-3 rounded-lg">
+                                <MdCheckCircle className="text-2xl text-pastel-red" />
+                            </div>
+                            <div>
+                                <p className="text-sm text-gray-500">Estado</p>
+                                <p className="font-medium text-gray-800">
+                                    {userData?.estado ? (
+                                        <span className="text-green-500">Activo</span>
+                                    ) : (
+                                        <span className="text-red-500">Inactivo</span>
+                                    )}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
+            </motion.div>
         </MainLayout>
-        
     );
 };
 

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { getAllPacientes, deletePaciente } from "../service/PacienteService";
-import { Link } from "react-router-dom";
 import { FaEdit, FaTrashAlt } from "react-icons/fa";
 import MainLayout from "../layouts/MainLayout";
 import ConfirmModal from "../components/ConfirmModal";
