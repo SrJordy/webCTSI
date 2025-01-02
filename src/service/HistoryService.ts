@@ -74,6 +74,7 @@ class HistoryServiceError extends Error {
 const API_URL = import.meta.env.VITE_API_URL;
 const BASE_URL = `${API_URL}/ApiHistorial`;
 
+
 export const HistoryService = {
     async getAllHistories(): Promise<HistorialMedico[]> {
         try {
@@ -88,7 +89,7 @@ export const HistoryService = {
 
     async getHistory(id: number): Promise<HistorialMedico> {
         try {
-            const response = await axios.get(`${BASE_URL}/${id}`);
+            const response = await axios.get(`${BASE_URL}?id=${id}`);
             return response.data;
         } catch (error) {
             console.error('Error fetching medical history:', error);
@@ -164,7 +165,7 @@ export const HistoryService = {
                 throw new HistoryServiceError('La temperatura debe estar entre 35°C y 42°C', 'VALIDATION_ERROR');
             }
 
-            const response = await axios.put(`${BASE_URL}/${id}`, {
+            const response = await axios.put(`${BASE_URL}?id=${id}`, {
                 ...data,
                 fecha: data.fecha ? new Date(data.fecha) : undefined
             });
@@ -180,7 +181,7 @@ export const HistoryService = {
 
     async deleteHistory(id: number): Promise<void> {
         try {
-            await axios.delete(`${BASE_URL}/${id}`);
+            await axios.delete(`${BASE_URL}?id=${id}`);
             toast.success('Historial médico eliminado exitosamente');
         } catch (error) {
             console.error('Error deleting medical history:', error);
