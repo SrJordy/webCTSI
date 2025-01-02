@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { createPaciente, updatePaciente } from "../service/PacienteService";
 import { getAllUsers } from "../service/UserService";
 import { motion, AnimatePresence } from "framer-motion";
+import SuccessModal from './SuccessModal';
+
 import {
     FaUser,
     FaCalendarAlt,
@@ -47,6 +49,8 @@ const PacienteFormModal: React.FC<PacienteFormModalProps> = ({
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(false);
 
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
     useEffect(() => {
         const fetchCuidadores = async () => {
             if (isOpen) {
@@ -132,12 +136,14 @@ const PacienteFormModal: React.FC<PacienteFormModalProps> = ({
 
             if (pacienteToEdit) {
                 await updatePaciente(pacienteToEdit.cod_paciente, data);
+                setSuccessMessage("Paciente actualizado exitosamente");
                 toast.success("Paciente actualizado exitosamente");
             } else {
                 await createPaciente(data);
+                setSuccessMessage("Paciente registrado exitosamente");
                 toast.success("Paciente registrado exitosamente");
             }
-            
+            setShowSuccessModal(true);             
             onSubmit();
             handleClose();
         } catch (error) {
@@ -149,6 +155,12 @@ const PacienteFormModal: React.FC<PacienteFormModalProps> = ({
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleSuccessModalClose = () => {
+        setShowSuccessModal(false);
+        onSubmit(formData);
+        onClose();
     };
 
     const handleSelectCuidador = (cuidador: any) => {
@@ -168,6 +180,7 @@ const PacienteFormModal: React.FC<PacienteFormModalProps> = ({
     );
 
     return (
+        <>
         <AnimatePresence>
             {isOpen && (
                 <div className="fixed inset-0 flex items-center justify-center z-50">
@@ -526,6 +539,13 @@ const PacienteFormModal: React.FC<PacienteFormModalProps> = ({
                 </div>
             )}
         </AnimatePresence>
+        <SuccessModal
+                isOpen={showSuccessModal}
+                onClose={handleSuccessModalClose}
+                message={successMessage}
+            />
+        </>
+        
     );
 };
 
