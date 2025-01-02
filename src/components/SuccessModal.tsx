@@ -32,15 +32,15 @@ const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose, message })
                         >
                             <FaCheckCircle className="w-16 h-16 text-green-500 mx-auto" />
                         </motion.div>
-                        
+
                         <h3 className="text-2xl font-bold text-gray-800 mb-4">
                             ¡Operación Exitosa!
                         </h3>
-                        
+
                         <p className="text-gray-600 mb-6">
                             {message}
                         </p>
-                        
+
                         <button
                             onClick={onClose}
                             className="bg-green-500 text-white px-6 py-2 rounded-lg
