@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { getAllPacientes, deletePaciente } from "../service/PacienteService";
-import { FaEdit, FaTrashAlt, FaSearch, FaFilter, FaDownload } from "react-icons/fa";
+import { FaEdit, FaTrashAlt, FaSearch, FaFilter, FaDownload, FaHistory } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import MainLayout from "../layouts/MainLayout";
 import ConfirmModal from "../components/ConfirmModal";
@@ -43,7 +43,7 @@ const ManagePatientsPage = () => {
             year: "numeric",
         });
     };
-    
+
     const fetchPatients = async () => {
         setIsLoading(true);
         try {
@@ -240,6 +240,14 @@ const ManagePatientsPage = () => {
                                                     <motion.button
                                                         whileHover={{ scale: 1.1 }}
                                                         whileTap={{ scale: 0.9 }}
+                                                        className="text-blue-600 hover:text-blue-900"
+                                                        onClick={() => handleViewHistory(patient)}
+                                                    >
+                                                        <FaHistory size={20} title="Ver Historial" />
+                                                    </motion.button>
+                                                    <motion.button
+                                                        whileHover={{ scale: 1.1 }}
+                                                        whileTap={{ scale: 0.9 }}
                                                         className="text-yellow-600 hover:text-yellow-900"
                                                         onClick={() => handleEdit(patient)}
                                                     >
@@ -336,7 +344,7 @@ const ManagePatientsPage = () => {
                         setPatientToEdit(null);
                     }}
                     onSubmit={() => {
-                        fetchPatients(); 
+                        fetchPatients();
                         setIsModalOpen(false);
                         setPatientToEdit(null);
                     }}

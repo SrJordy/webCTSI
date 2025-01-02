@@ -4,13 +4,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
     MdDashboard, 
     MdExitToApp, 
-    MdPerson, 
-    MdMenu,
+    MdPerson,
     MdLocalHospital,
     MdSettings,
     MdHelp,
     MdChevronLeft,
-    MdChevronRight
+    MdChevronRight,
+    MdHistoryEdu
 } from 'react-icons/md';
 
 interface MenuItem {
@@ -37,7 +37,7 @@ const Sidebar = () => {
         { title: 'Dashboard', path: '/dashboard', icon: MdDashboard },
         { title: 'Gestión de Usuarios', path: '/manage-users', icon: MdPerson},
         { title: 'Gestión de Pacientes', path: '/managepatient', icon: MdLocalHospital},
-        { title: 'Configuración', path: '/settings', icon: MdSettings },
+        { title: 'Historial Medico', path: '/History', icon: MdHistoryEdu },
         { title: 'Ayuda', path: '/help', icon: MdHelp },
     ];
 
