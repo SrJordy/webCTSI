@@ -1,4 +1,5 @@
 import axios from "axios";
+import { createRecordatorio } from './RecordatorioService';
 
 const API_URL = import.meta.env.VITE_API_URL;
 const RECETA_URL = `${API_URL}/ApiReceta`;
@@ -27,7 +28,7 @@ interface RecetaData {
 
 export const getAllRecetas = async (): Promise<any> => {
     try {
-        const response = await axios.get(RECETA_URL);
+        const response = await axios.get(RECETA_URL, axiosConfig);
         return response.data;
     } catch (error) {
         console.error("Error al obtener las recetas", error);
@@ -37,7 +38,7 @@ export const getAllRecetas = async (): Promise<any> => {
 
 export const getReceta = async (id: number): Promise<any> => {
     try {
-        const response = await axios.get(`${RECETA_URL}?id=${id}`);
+        const response = await axios.get(`${RECETA_URL}?id=${id}`, axiosConfig);
         return response.data;
     } catch (error) {
         console.error("Error al obtener la receta", error);
@@ -53,27 +54,14 @@ const axiosConfig = {
 };
 
 export const createReceta = async (
-    recetaData: {
-        persona_id: number;
-        profesional_id: number;
-    },
-    medicamentos: Array<{
-        nombre: string;
-        descripcion: string;
-        frecuenciamin: number;
-        cantidadtotal: number;
-    }>,
-    recordatorios: Array<{
-        fechahora: Date;
-        persona_id: number;
-    }>
+    recetaData: RecetaData,
+    medicamentos: Array<Medicamento>,
+    recordatorios: Array<Omit<Recordatorio, 'medicamento_id'>>
 ): Promise<any> => {
     try {
         // 1. Crear la receta
-        console.log('Datos de la receta a crear:', recetaData);
-        const recetaResponse = await axios.post(RECETA_URL, recetaData);
+        const recetaResponse = await axios.post(RECETA_URL, recetaData, axiosConfig);
         const cod_receta = recetaResponse.data.cod_receta;
-        console.log('Receta creada exitosamente con ID:', cod_receta);
 
         // 2. Crear los medicamentos asociados a la receta
         const medicamentosCreados = [];
@@ -82,17 +70,15 @@ export const createReceta = async (
                 ...medicamento,
                 receta_id: cod_receta
             };
-            console.log('Creando medicamento:', medicamentoData);
-            const medicamentoResponse = await axios.post(MEDICAMENTO_URL, medicamentoData);
+            const medicamentoResponse = await axios.post(MEDICAMENTO_URL, medicamentoData, axiosConfig);
             const cod_medicamento = medicamentoResponse.data.cod_medicamento;
             medicamentosCreados.push({
                 cod_medicamento,
                 ...medicamento
             });
-            console.log('Medicamento creado exitosamente con ID:', cod_medicamento);
         }
 
-        // 3. Crear los recordatorios para cada medicamento
+        // 3. Crear los recordatorios para cada medicamento usando el nuevo servicio
         for (let i = 0; i < medicamentosCreados.length; i++) {
             const recordatoriosParaMedicamento = recordatorios[i];
             if (recordatoriosParaMedicamento) {
@@ -102,9 +88,7 @@ export const createReceta = async (
                     persona_id: recetaData.persona_id,
                     estado: true
                 };
-                console.log('Creando recordatorio:', recordatorioData);
-                await axios.post(RECORDATORIO_URL, recordatorioData);
-                console.log('Recordatorio creado exitosamente');
+                await createRecordatorio(recordatorioData);
             }
         }
 
@@ -113,12 +97,8 @@ export const createReceta = async (
             medicamentos: medicamentosCreados
         };
     } catch (error) {
-        console.error("Error detallado al crear la receta:", error);
-        if (axios.isAxiosError(error)) {
-            console.error("Respuesta del servidor:", error.response?.data);
-            console.error("Estado de la respuesta:", error.response?.status);
-        }
-        throw new Error("Error al crear la receta");
+        console.error("Error al crear la receta:", error);
+        throw error;
     }
 };
 

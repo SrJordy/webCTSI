@@ -16,7 +16,23 @@ interface Paciente {
     genero: string;
     direccion?: string;
 }
+interface RecetaData {
+    persona_id: number;
+    profesional_id: number;
+}
 
+interface Recordatorio {
+    medicamento_id: number;
+    fechahora: Date;
+    persona_id: number;
+    estado: boolean;
+}
+
+const timeToMinutes = (timeString: string): number => {
+    const [hours, minutes] = timeString.split(':').map(Number);
+    console.log('Horas:', hours, 'Minutos:', minutes, 'Total:', (hours * 60) + minutes);
+    return (hours * 60) + minutes;
+};
 
 export const RecetaPage = () => {
     const [formData, setFormData] = useState({
@@ -48,17 +64,13 @@ export const RecetaPage = () => {
                         ...prev,
                         profesional_id: String(user.cod_usuario)
                     }));
-                    console.log('Profesional ID establecido:', user.cod_usuario);
                 } else {
-                    console.error('No se encontró cod_profesional en los datos del usuario');
                     toast.error('Error al obtener datos del profesional');
                 }
             } catch (error) {
-                console.error('Error al parsear datos del usuario:', error);
                 toast.error('Error al obtener datos del profesional');
             }
         } else {
-            console.error('No se encontraron datos del usuario en localStorage');
             toast.error('No se encontraron datos del profesional');
         }
     }, []);
@@ -116,42 +128,37 @@ export const RecetaPage = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!formData.profesional_id || !formData.persona_id) {
             toast.error('Faltan datos necesarios para crear la receta');
             return;
         }
-    
+
         setLoading(true);
-    
+
         try {
             const recetaData: RecetaData = {
                 persona_id: parseInt(formData.persona_id),
                 profesional_id: parseInt(formData.profesional_id)
             };
-    
+
             const medicamentos = formData.medicamentos.map(med => ({
                 nombre: med.nombre,
                 descripcion: med.descripcion,
-                frecuenciamin: parseInt(med.frecuenciamin),
+                frecuenciamin: timeToMinutes(med.frecuenciamin), // Convierte HH:mm a minutos
                 cantidadtotal: parseInt(med.cantidadtotal)
             }));
-    
+
             const recordatorios: Omit<Recordatorio, 'medicamento_id'>[] = [];
-            medicamentos.forEach((med) => {
+            medicamentos.forEach((med, index) => {
                 const { frecuenciamin, cantidadtotal } = med;
-                
-                // Obtener la hora actual y ajustarla a Colombia (UTC-5)
-                const now = new Date();
-                const colombiaOffset = -5 * 60; // -5 horas en minutos
-                const userOffset = now.getTimezoneOffset();
-                const offsetDiff = userOffset + colombiaOffset;
-                
-                // Ajustar la hora inicial a la zona horaria de Colombia
-                const startTime = new Date(now.getTime() + offsetDiff * 60 * 1000);
-    
+
+                // Obtener la fecha y hora inicial del recordatorio
+                const fechaInicial = new Date(formData.medicamentos[index].recordatorio.fechahora);
+
+                // Generar recordatorios basados en la fecha inicial y la frecuencia
                 for (let i = 0; i < cantidadtotal; i++) {
-                    const nextReminder = new Date(startTime.getTime() + i * frecuenciamin * 60 * 1000);
+                    const nextReminder = new Date(fechaInicial.getTime() + i * frecuenciamin * 60 * 1000);
                     recordatorios.push({
                         fechahora: nextReminder,
                         persona_id: parseInt(formData.persona_id),
@@ -159,13 +166,17 @@ export const RecetaPage = () => {
                     });
                 }
             });
-    
+
             console.log('=== DATOS A ENVIAR ===');
             console.log('Receta:', recetaData);
-            console.log('Medicamentos:', medicamentos);
+            console.log('Medicamentos:', medicamentos.map((med, index) => ({
+                ...med,
+                frecuencia_original: formData.medicamentos[index].frecuenciamin,
+                frecuencia_en_minutos: med.frecuenciamin
+            })));
             console.log('Recordatorios generados:', recordatorios.map(r => ({
                 ...r,
-                fechahora: r.fechahora.toLocaleString('es-CO', { 
+                fechahora: r.fechahora.toLocaleString('es-CO', {
                     timeZone: 'America/Bogota',
                     year: 'numeric',
                     month: '2-digit',
@@ -175,26 +186,22 @@ export const RecetaPage = () => {
                     hour12: true
                 })
             })));
-            console.log('==================');
-    
-            const isValid = medicamentos.every(med => 
-                med.nombre && 
-                med.descripcion && 
-                !isNaN(med.frecuenciamin) && 
-                !isNaN(med.cantidadtotal) && 
-                med.frecuenciamin > 0 && 
+
+            const isValid = medicamentos.every(med =>
+                med.nombre &&
+                med.descripcion &&
+                med.frecuenciamin > 0 &&
                 med.cantidadtotal > 0
             );
-    
+
             if (!isValid) {
                 toast.error('Por favor complete todos los campos de medicamentos correctamente');
                 return;
             }
-    
+
             const result = await RecetaService.createReceta(recetaData, medicamentos, recordatorios);
-            console.log('Respuesta del servidor:', result);
             toast.success('Receta registrada exitosamente');
-            
+
             setFormData({
                 persona_id: '',
                 profesional_id: formData.profesional_id,
@@ -211,7 +218,6 @@ export const RecetaPage = () => {
             });
             setSelectedPatient(null);
         } catch (error) {
-            console.error('Error detallado al crear la receta:', error);
             if (axios.isAxiosError(error)) {
                 console.error('Respuesta del servidor:', error.response?.data);
                 console.error('Estado de la respuesta:', error.response?.status);
@@ -228,7 +234,6 @@ export const RecetaPage = () => {
                 <div className="max-w-6xl mx-auto">
                     <div className="bg-white rounded-xl shadow-lg p-6">
                         <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Nueva Receta Médica</h2>
-
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="bg-gray-50 p-6 rounded-xl">
                                 <div className="flex justify-between items-center mb-4">
@@ -244,7 +249,6 @@ export const RecetaPage = () => {
                                         Seleccionar Paciente
                                     </button>
                                 </div>
-
                                 {selectedPatient ? (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-4 rounded-lg shadow-sm">
                                         <div>
@@ -280,7 +284,6 @@ export const RecetaPage = () => {
                                     </p>
                                 )}
                             </div>
-
                             <div className="space-y-6">
                                 <div className="flex justify-between items-center">
                                     <h3 className="text-lg font-semibold text-gray-800 flex items-center">
@@ -296,7 +299,6 @@ export const RecetaPage = () => {
                                         Agregar Medicamento
                                     </button>
                                 </div>
-
                                 {formData.medicamentos.map((medicamento, index) => (
                                     <div key={index} className="bg-gray-50 p-6 rounded-xl space-y-4">
                                         <div className="flex justify-between items-center">
@@ -312,7 +314,6 @@ export const RecetaPage = () => {
                                                 </button>
                                             )}
                                         </div>
-
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -340,10 +341,10 @@ export const RecetaPage = () => {
                                             </div>
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                    Frecuencia (minutos)
+                                                    Frecuencia
                                                 </label>
                                                 <input
-                                                    type="number"
+                                                    type="time"
                                                     value={medicamento.frecuenciamin}
                                                     onChange={(e) => handleMedicamentoChange(index, 'frecuenciamin', e.target.value)}
                                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:border-transparent"
@@ -363,35 +364,38 @@ export const RecetaPage = () => {
                                                 />
                                             </div>
                                         </div>
-
                                         <div className="bg-white p-4 rounded-lg shadow-sm">
                                             <h5 className="text-sm font-medium text-gray-700 mb-3 flex items-center">
                                                 <FaClock className="mr-2" />
                                                 Recordatorio
                                             </h5>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                    Fecha y Hora
-                                                </label>
-                                                <input
-                                                    type="datetime-local"
-                                                    value={medicamento.recordatorio.fechahora}
-                                                    onChange={(e) => handleRecordatorioChange(index, e.target.value)}
-                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:border-transparent"
-                                                    required
-                                                />
+                                            <div className="bg-white p-4 rounded-lg shadow-sm">
+                                                <h5 className="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                                                    <FaClock className="mr-2" />
+                                                    Recordatorio
+                                                </h5>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Fecha y Hora Inicial
+                                                    </label>
+                                                    <input
+                                                        type="datetime-local"
+                                                        value={medicamento.recordatorio.fechahora}
+                                                        onChange={(e) => handleRecordatorioChange(index, e.target.value)}
+                                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:border-transparent"
+                                                        required
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 ))}
                             </div>
-
                             <div className="flex justify-end pt-6">
                                 <button
                                     type="submit"
                                     disabled={loading || !selectedPatient}
-                                    className={`px-6 py-2 bg-red-400 text-white rounded-lg hover:bg-red-500 transition-colors flex items-center ${(loading || !selectedPatient) ? 'opacity-50 cursor-not-allowed' : ''
-                                        }`}
+                                    className={`px-6 py-2 bg-red-400 text-white rounded-lg hover:bg-red-500 transition-colors flex items-center ${(loading || !selectedPatient) ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
                                     {loading ? 'Registrando...' : 'Registrar Receta'}
                                 </button>
@@ -400,7 +404,6 @@ export const RecetaPage = () => {
                     </div>
                 </div>
             </div>
-
             <SelectPatientModal
                 isOpen={isPatientModalOpen}
                 onClose={() => setIsPatientModalOpen(false)}
