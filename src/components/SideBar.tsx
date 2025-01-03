@@ -39,7 +39,7 @@ const Sidebar = () => {
         { title: 'Gestión de Usuarios', path: '/manage-users', icon: MdPerson},
         { title: 'Gestión de Pacientes', path: '/managepatient', icon: MdLocalHospital},
         { title: 'Historial Medico', path: '/History', icon: MdHistoryEdu },
-        { title: 'Receta', path: '/Receta', icon: MdReceipt },
+        { title: 'Receta', path: '/managerecipes', icon: MdReceipt },
     ];
 
     const handleLogout = () => {
