@@ -10,7 +10,8 @@ import {
     MdHelp,
     MdChevronLeft,
     MdChevronRight,
-    MdHistoryEdu
+    MdHistoryEdu,
+    MdReceipt
 } from 'react-icons/md';
 
 interface MenuItem {
@@ -38,7 +39,7 @@ const Sidebar = () => {
         { title: 'Gestión de Usuarios', path: '/manage-users', icon: MdPerson},
         { title: 'Gestión de Pacientes', path: '/managepatient', icon: MdLocalHospital},
         { title: 'Historial Medico', path: '/History', icon: MdHistoryEdu },
-        { title: 'Ayuda', path: '/help', icon: MdHelp },
+        { title: 'Receta', path: '/Receta', icon: MdReceipt },
     ];
 
     const handleLogout = () => {
