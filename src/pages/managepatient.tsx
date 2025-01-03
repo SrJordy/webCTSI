@@ -237,14 +237,7 @@ const ManagePatientsPage = () => {
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex space-x-2">
-                                                    <motion.button
-                                                        whileHover={{ scale: 1.1 }}
-                                                        whileTap={{ scale: 0.9 }}
-                                                        className="text-blue-600 hover:text-blue-900"
-                                                        onClick={() => handleViewHistory(patient)}
-                                                    >
-                                                        <FaHistory size={20} title="Ver Historial" />
-                                                    </motion.button>
+                                                    
                                                     <motion.button
                                                         whileHover={{ scale: 1.1 }}
                                                         whileTap={{ scale: 0.9 }}

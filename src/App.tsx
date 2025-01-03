@@ -4,6 +4,7 @@ import DashboardPage from './pages/dashboard';
 import ManageUsersPage from './pages/manage-users';
 import ManagePatientsPage from './pages/managepatient'
 import HistoryPage from './pages/History';
+import HistorialView from './pages/[id]';
 
 const App = () => {
   return (
@@ -15,6 +16,7 @@ const App = () => {
         <Route path="/manage-users" element={<ManageUsersPage />} />
         <Route path="/managepatient" element={<ManagePatientsPage />} />
         <Route path='/History' element={<HistoryPage />} />
+        <Route path="/:id" element={<HistorialView />} />
       </Routes>
     </BrowserRouter>
   );

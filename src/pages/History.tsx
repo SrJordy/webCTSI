@@ -6,6 +6,7 @@ import { HistoryService } from '../service/HistoryService';
 import { toast } from 'react-hot-toast';
 import ConfirmModal from '../components/ConfirmModal';
 import HistoryFormModal from '../components/HistoryFormModal';
+import { useNavigate } from 'react-router-dom';
 
 interface HistorialMedico {
     cod_historial: number;
@@ -44,7 +45,7 @@ const HistoryPage = () => {
     const [historialToEdit, setHistorialToEdit] = useState<HistorialMedico | null>(null);
 
     const itemsPerPage = 8;
-
+    const navigate = useNavigate();
     const handleEdit = (historial: HistorialMedico) => {
         setHistorialToEdit(historial);
         setIsFormModalOpen(true);
@@ -220,7 +221,7 @@ const HistoryPage = () => {
                                                     whileHover={{ scale: 1.1 }}
                                                     whileTap={{ scale: 0.9 }}
                                                     className="text-blue-500 hover:text-blue-700"
-                                                    onClick={() => window.location.href = `/historial/${history.cod_historial}`}
+                                                    onClick={() => navigate(`/${history.cod_historial}`)}
                                                 >
                                                     <FaEye size={20} />
                                                 </motion.button>

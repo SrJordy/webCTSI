@@ -20,9 +20,13 @@ interface HistorialMedico {
         apellido: string;
     };
     persona?: {
-        cod_paciente: number;
         nombre: string;
         apellido: string;
+        fecha_nacimiento: Date;
+        genero: string;
+        direccion: string;
+        telefono: string;
+        email: string;
     };
     diagnostico?: Diagnostico[];
     tratamiento?: Tratamiento[];
@@ -90,6 +94,7 @@ export const HistoryService = {
     async getHistory(id: number): Promise<HistorialMedico> {
         try {
             const response = await axios.get(`${BASE_URL}?id=${id}`);
+            console.log(response.data);
             return response.data;
         } catch (error) {
             console.error('Error fetching medical history:', error);
