@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import * as RecetaService from '../service/RecetaService';
 import SelectPatientModal from '../components/SelectPatientModal';
 import axios from 'axios';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Paciente {
     cod_paciente: number;
@@ -230,8 +231,16 @@ export const RecetaPage = () => {
 
     return (
         <MainLayout>
-            <div className="min-h-full bg-gradient-to-br from-red-50 to-pink-50 -m-8 p-8">
-                <div className="max-w-6xl mx-auto">
+            <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="min-h-full bg-gradient-to-br from-red-50 to-pink-50 -m-8 p-8">
+                <motion.div 
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="max-w-6xl mx-auto">
                     <div className="bg-white rounded-xl shadow-lg p-6">
                         <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Nueva Receta Médica</h2>
                         <form onSubmit={handleSubmit} className="space-y-6">
@@ -402,8 +411,8 @@ export const RecetaPage = () => {
                             </div>
                         </form>
                     </div>
-                </div>
-            </div>
+                </motion.div>
+            </motion.div>
             <SelectPatientModal
                 isOpen={isPatientModalOpen}
                 onClose={() => setIsPatientModalOpen(false)}
