@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import MainLayout from '../layouts/MainLayout';
-import { FaPlus, FaEdit, FaTrash, FaSearch, FaCalendar, FaTimes } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaSearch, FaCalendar } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import * as RecetaService from '../service/RecetaService';
 import { motion, AnimatePresence } from 'framer-motion';
 import ConfirmModal from '../components/ConfirmModal';
 import { useNavigate } from 'react-router-dom';
+import RecetaDetailModal from '../components/ModalReceta';
 
 interface Medicamento {
     cod_medicamento: number;
@@ -18,7 +19,7 @@ interface Medicamento {
 
 interface Receta {
     cod_receta: number;
-    fecha_creacion: string;
+    fecha: string;
     persona: {
         cod_persona: number;
         nombre: string;
@@ -34,36 +35,6 @@ interface Receta {
     medicamentos: Medicamento[];
 }
 
-const RecetaDetailModal = ({ isOpen, onClose, receta }) => {
-    if (!receta) return null;
-
-    return (
-        <AnimatePresence>
-            {isOpen && (
-                <>
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50"
-                        onClick={onClose}
-                    />
-                    <div className="fixed inset-0 flex items-center justify-center z-50 p-4 pointer-events-none">
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            className="bg-white rounded-xl shadow-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto pointer-events-auto"
-                        >
-                            {/* ... (contenido del modal igual al proporcionado anteriormente) ... */}
-                        </motion.div>
-                    </div>
-                </>
-            )}
-        </AnimatePresence>
-    );
-};
-
 export const RecetasListPage = () => {
     const [recetas, setRecetas] = useState<Receta[]>([]);
     const [loading, setLoading] = useState(true);
@@ -73,24 +44,15 @@ export const RecetasListPage = () => {
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [selectedReceta, setSelectedReceta] = useState<Receta | null>(null);
     const navigate = useNavigate();
+
     useEffect(() => {
         fetchRecetas();
     }, []);
-
-
-
-    const groupMedicamentosByReceta = (recetas: Receta[]) => {
-        return recetas.map(receta => ({
-            ...receta,
-            medicamentos: receta.medicamentos.filter(med => med.cod_receta === receta.cod_receta)
-        }));
-    };
 
     const fetchRecetas = async () => {
         try {
             setLoading(true);
             const response = await RecetaService.getAllRecetas();
-            console.log('Datos recibidos:', response);
             setRecetas(response || []);
         } catch (error) {
             console.error('Error al cargar las recetas:', error);
@@ -113,51 +75,25 @@ export const RecetasListPage = () => {
         setSelectedReceta(null);
     };
 
-    const groupRecetas = (recetas: Receta[]) => {
-        const grouped = recetas.reduce((acc, receta) => {
-            // Si ya existe la receta, solo agregamos los medicamentos
-            if (acc[receta.cod_receta]) {
-                if (receta.medicamentos) {
-                    acc[receta.cod_receta].medicamentos = [
-                        ...acc[receta.cod_receta].medicamentos,
-                        ...receta.medicamentos
-                    ];
-                }
-            } else {
-                // Si no existe, creamos una nueva entrada
-                acc[receta.cod_receta] = {
-                    ...receta,
-                    medicamentos: receta.medicamentos || []
-                };
-            }
-            return acc;
-        }, {} as { [key: number]: Receta });
-
-        return Object.values(grouped);
-    };
-
-    const filteredRecetas = groupRecetas(recetas).filter(receta => {
+    const filteredRecetas = recetas.filter(receta => {
         if (!receta || !receta.persona) return false;
 
         const nombreCompleto = `${receta.persona.nombre} ${receta.persona.apellido}`.toLowerCase();
         const matchesSearch = nombreCompleto.includes(searchTerm.toLowerCase());
 
-        // Formatear las fechas para comparación
         let matchesDate = true;
         if (dateFilter) {
-            const recetaDate = new Date(receta.fecha_creacion).toISOString().split('T')[0];
-            matchesDate = recetaDate === dateFilter;
+            const recetaDate = new Date(receta.fecha);
+            if (isNaN(recetaDate.getTime())) {
+                console.error(`Fecha inválida para receta con ID ${receta.cod_receta}: ${receta.fecha}`);
+                matchesDate = false; 
+            } else {
+                matchesDate = recetaDate.toISOString().split('T')[0] === dateFilter;
+            }
         }
 
         return matchesSearch && matchesDate;
     });
-    useEffect(() => {
-        if (dateFilter) {
-            console.log('Fecha filtro:', dateFilter);
-            console.log('Recetas filtradas:', filteredRecetas);
-        }
-    }, [dateFilter, filteredRecetas]);
-
 
     return (
         <MainLayout>
@@ -236,50 +172,51 @@ export const RecetasListPage = () => {
                                             animate={{ opacity: 1, scale: 1 }}
                                             exit={{ opacity: 0, scale: 0.9 }}
                                             className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                                            onClick={() => {
-                                                console.log('Receta seleccionada:', receta);
-                                                setSelectedReceta(receta);
+                                            onClick={async () => {
+                                                const recetaConMedicamentos = await RecetaService.getRecetaConMedicamentos(receta.cod_receta);
+                                                setSelectedReceta(recetaConMedicamentos);
                                                 setShowDetailModal(true);
                                             }}
                                         >
                                             <div className="p-4">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <h3 className="text-lg font-semibold text-gray-800">
-                                                        {`${receta.persona.nombre} ${receta.persona.apellido}`}
-                                                    </h3>
-                                                    <div className="flex space-x-2">
-                                                        <motion.button
-                                                            whileHover={{ scale: 1.1 }}
-                                                            whileTap={{ scale: 0.9 }}
-                                                            className="text-blue-500 hover:text-blue-600"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                navigate(`/receta/${receta.cod_receta}`);
-                                                            }}
-                                                        >
-                                                            <FaEdit />
-                                                        </motion.button>
-                                                        <motion.button
-                                                            whileHover={{ scale: 1.1 }}
-                                                            whileTap={{ scale: 0.9 }}
-                                                            className="text-red-500 hover:text-red-600"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                setSelectedReceta(receta);
-                                                                setShowDeleteModal(true);
-                                                            }}
-                                                        >
-                                                            <FaTrash />
-                                                        </motion.button>
-                                                    </div>
-                                                </div>
+                                                <h3 className="text-lg font-semibold text-gray-800">
+                                                    {`Receta# ${receta.cod_receta}`}
+                                                </h3>
+                                                <p className="text-sm text-gray-600">
+                                                    Paciente: {`${receta.persona.nombre} ${receta.persona.apellido}`}
+                                                </p>
                                                 <p className="text-sm text-gray-600">CID: {receta.persona.CID}</p>
                                                 <p className="text-sm text-gray-600">
-                                                    Fecha: {new Date(receta.fecha_creacion).toLocaleDateString()}
+                                                    Fecha: {new Date(receta.fecha).toLocaleDateString()}
                                                 </p>
                                                 <p className="text-sm text-gray-600">
                                                     Doctor: {`${receta.profesional.nombre} ${receta.profesional.apellido}`}
                                                 </p>
+                                                <div className="flex justify-end mt-4">
+                                                    <motion.button
+                                                        whileHover={{ scale: 1.1 }}
+                                                        whileTap={{ scale: 0.9 }}
+                                                        className="text-blue-500 hover:text-blue-600 mr-2"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            navigate(`/receta/${receta.cod_receta}`);
+                                                        }}
+                                                    >
+                                                        <FaEdit />
+                                                    </motion.button>
+                                                    <motion.button
+                                                        whileHover={{ scale: 1.1 }}
+                                                        whileTap={{ scale: 0.9 }}
+                                                        className="text-red-500 hover:text-red-600"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setSelectedReceta(receta);
+                                                            setShowDeleteModal(true);
+                                                        }}
+                                                    >
+                                                        <FaTrash />
+                                                    </motion.button>
+                                                </div>
                                             </div>
                                         </motion.div>
                                     ))}
@@ -292,7 +229,6 @@ export const RecetasListPage = () => {
             <RecetaDetailModal
                 isOpen={showDetailModal}
                 onClose={() => {
-                    console.log('Receta pasada al modal:', selectedReceta);
                     setShowDetailModal(false);
                     setSelectedReceta(null);                    
                 }}

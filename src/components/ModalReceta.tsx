@@ -65,7 +65,7 @@ const RecetaDetailModal = ({ isOpen, onClose, receta }) => {
                             <div className="mb-6">
                                 <h3 className="text-lg font-semibold text-gray-700 mb-3">Medicamentos Recetados</h3>
                                 <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
-                                    {receta?.medicamentos?.map((med) => (
+                                    {receta?.medicamento?.map((med) => (
                                         <div
                                             key={med.cod_medicamento}
                                             className="mb-4 last:mb-0 p-3 bg-white rounded-lg shadow-sm border"
@@ -82,7 +82,7 @@ const RecetaDetailModal = ({ isOpen, onClose, receta }) => {
                             </div>
 
                             <div className="text-sm text-gray-500">
-                                Fecha de creación: {new Date(receta.fecha_creacion).toLocaleDateString()}
+                                Fecha de creación: {new Date(receta.fecha).toLocaleDateString()}
                             </div>
                         </motion.div>
                     </div>
