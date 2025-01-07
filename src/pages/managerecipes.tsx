@@ -43,6 +43,8 @@ export const RecetasListPage = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [selectedReceta, setSelectedReceta] = useState<Receta | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(9);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -94,6 +96,12 @@ export const RecetasListPage = () => {
 
         return matchesSearch && matchesDate;
     });
+
+    // Paginación
+    const indexOfLastReceta = currentPage * itemsPerPage;
+    const indexOfFirstReceta = indexOfLastReceta - itemsPerPage;
+    const currentRecetas = filteredRecetas.slice(indexOfFirstReceta, indexOfLastReceta);
+    const totalPages = Math.ceil(filteredRecetas.length / itemsPerPage);
 
     return (
         <MainLayout>
@@ -165,7 +173,7 @@ export const RecetasListPage = () => {
                         ) : (
                             <AnimatePresence>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {filteredRecetas.map((receta) => (
+                                    {currentRecetas.map((receta) => (
                                         <motion.div
                                             key={receta.cod_receta}
                                             initial={{ opacity: 0, scale: 0.9 }}
@@ -224,6 +232,26 @@ export const RecetasListPage = () => {
                             </AnimatePresence>
                         )}
                     </motion.div>
+
+                    {/* Paginación */}
+                    {totalPages > 1 && (
+                        <div className="flex justify-center mt-4">
+                            <nav className="flex gap-2">
+                                {Array.from({ length: totalPages }, (_, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => setCurrentPage(index + 1)}
+                                        className={`px-4 py-2 rounded-lg ${currentPage === index + 1
+                                            ? 'bg-red-500 text-white'
+                                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                            }`}
+                                    >
+                                        {index + 1}
+                                    </button>
+                                ))}
+                            </nav>
+                        </div>
+                    )}
                 </div>
             </motion.div>
             <RecetaDetailModal
