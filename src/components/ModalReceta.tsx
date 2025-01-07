@@ -6,6 +6,16 @@ const RecetaDetailModal = ({ isOpen, onClose, receta }) => {
 
     if (!isOpen || !receta) return null;
 
+    // Función para convertir minutos a formato "X horas Y minutos"
+    const formatFrecuencia = (minutos) => {
+        if (minutos < 60) {
+            return `${minutos} minutos`;
+        }
+        const horas = Math.floor(minutos / 60);
+        const minutosRestantes = minutos % 60;
+        return `${horas} hora${horas > 1 ? 's' : ''} ${minutosRestantes} minuto${minutosRestantes !== 1 ? 's' : ''}`;
+    };
+
     return (
         <AnimatePresence>
             {isOpen && (
@@ -73,7 +83,7 @@ const RecetaDetailModal = ({ isOpen, onClose, receta }) => {
                                             <p className="font-medium text-gray-800 mb-1">{med.nombre}</p>
                                             <p className="text-gray-600 text-sm mb-1">{med.descripcion}</p>
                                             <div className="flex gap-4 text-sm text-gray-500">
-                                                <p>Frecuencia: {med.frecuenciamin} minutos</p>
+                                                <p>Frecuencia: {formatFrecuencia(med.frecuenciamin)}</p>
                                                 <p>Cantidad: {med.cantidadtotal} unidades</p>
                                             </div>
                                         </div>
