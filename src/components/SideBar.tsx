@@ -6,12 +6,11 @@ import {
     MdExitToApp, 
     MdPerson,
     MdLocalHospital,
-    MdSettings,
-    MdHelp,
     MdChevronLeft,
     MdChevronRight,
     MdHistoryEdu,
-    MdReceipt
+    MdReceipt,
+    MdAssignmentAdd
 } from 'react-icons/md';
 
 interface MenuItem {
@@ -40,6 +39,7 @@ const Sidebar = () => {
         { title: 'Gestión de Pacientes', path: '/managepatient', icon: MdLocalHospital},
         { title: 'Historial Medico', path: '/History', icon: MdHistoryEdu },
         { title: 'Receta', path: '/managerecipes', icon: MdReceipt },
+        { title: 'Tratamientos', path: '/Tratamientos', icon: MdAssignmentAdd},
     ];
 
     const handleLogout = () => {
