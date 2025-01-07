@@ -2,11 +2,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes } from 'react-icons/fa';
 
 const RecetaDetailModal = ({ isOpen, onClose, receta }) => {
-    console.log('Datos recibidos en el modal:', receta);
-
     if (!isOpen || !receta) return null;
 
-    // Función para convertir minutos a formato "X horas Y minutos"
     const formatFrecuencia = (minutos) => {
         if (minutos < 60) {
             return `${minutos} minutos`;

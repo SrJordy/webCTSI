@@ -6,7 +6,6 @@ const PACIENTES_URL = `${API_URL}/ApiPaciente`;
 export const getAllPacientes = async (): Promise<any> => {
     try {
         const response = await axios.get(PACIENTES_URL);
-        console.log("asdsadadasd",response.data.data);
         return response.data.data;
     } catch (error) {
         console.error("Error al obtener los pacientes", error);

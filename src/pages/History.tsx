@@ -17,7 +17,7 @@ interface HistorialMedico {
     estatura: number;
     temperatura?: number;
     nivel_glucosa?: number;
-    fecha: Date;
+    fecha: Date | string; // Asegúrate de que este campo pueda ser un string o un objeto Date
     profesional_id: number;
     persona_id: number;
     estado: boolean;
@@ -69,25 +69,31 @@ const HistoryPage = () => {
         fetchHistories();
     }, []);
 
-    const formatDate = (dateString: string | Date) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('es-ES', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-        });
-    };
-
     const filteredHistories = useMemo(() => {
         return histories.filter(history => {
-            const searchLower = searchTerm.toLowerCase();
-            const matchesSearch =
-                (history.persona?.nombre?.toLowerCase() || '').includes(searchLower) ||
-                (history.persona?.apellido?.toLowerCase() || '').includes(searchLower) ||
-                (history.profesional?.nombre?.toLowerCase() || '').includes(searchLower) ||
-                (history.profesional?.apellido?.toLowerCase() || '').includes(searchLower);
+            if (!history || !history.persona) return false;
 
-            const matchesDate = !filterDate || formatDate(history.fecha) === filterDate;
+            // Filtrado por nombre completo
+            const nombreCompleto = `${history.persona.nombre} ${history.persona.apellido}`.toLowerCase();
+            const matchesSearch = nombreCompleto.includes(searchTerm.toLowerCase());
+
+            // Filtrado por fecha
+            let matchesDate = true;
+            if (filterDate) {
+                let recetaDate: Date;
+                if (typeof history.fecha === 'string') {
+                    recetaDate = new Date(history.fecha);
+                } else {
+                    recetaDate = history.fecha; // Asumimos que ya es un objeto Date
+                }
+
+                if (isNaN(recetaDate.getTime())) {
+                    console.error(`Fecha inválida para historial con ID ${history.cod_historial}: ${history.fecha}`);
+                    matchesDate = false; 
+                } else {
+                    matchesDate = recetaDate.toISOString().split('T')[0] === filterDate; // Comparar con el formato YYYY-MM-DD
+                }
+            }
 
             return matchesSearch && matchesDate;
         });
@@ -116,17 +122,20 @@ const HistoryPage = () => {
         const headers = ['Fecha', 'Paciente', 'Profesional', 'Presión Arterial', 'Peso', 'Estatura', 'IMC', 'Temperatura', 'Glucosa'];
         const csvContent = [
             headers.join(','),
-            ...filteredHistories.map(history => [
-                formatDate(history.fecha),
-                `${history.persona?.nombre} ${history.persona?.apellido}`,
-                `${history.profesional?.nombre} ${history.profesional?.apellido}`,
-                history.presion_arterial,
-                history.peso,
-                history.estatura,
-                history.tipo_sangre || 'N/A',
-                history.temperatura || 'N/A',
-                history.nivel_glucosa || 'N/A'
-            ].join(','))
+            ...filteredHistories.map(history => {
+                let fecha = typeof history.fecha === 'string' ? new Date(history.fecha) : history.fecha;
+                return [
+                    fecha.toISOString().split('T')[0], // Formato YYYY-MM-DD
+                    `${history.persona?.nombre} ${history.persona?.apellido}`,
+                    `${history.profesional?.nombre} ${history.profesional?.apellido}`,
+                    history.presion_arterial,
+                    history.peso,
+                    history.estatura,
+                    history.tipo_sangre || 'N/A',
+                    history.temperatura || 'N/A',
+                    history.nivel_glucosa || 'N/A'
+                ].join(',');
+            })
         ].join('\n');
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -213,7 +222,7 @@ const HistoryPage = () => {
                                                     {history.persona?.nombre} {history.persona?.apellido}
                                                 </h3>
                                                 <p className="text-sm text-gray-500">
-                                                    {formatDate(history.fecha)}
+                                                    {typeof history.fecha === 'string' ? new Date(history.fecha).toISOString().split('T')[0] : history.fecha.toISOString().split('T')[0]} {/* Formato YYYY-MM-DD */}
                                                 </p>
                                             </div>
                                             <div className="flex gap-2">
@@ -275,6 +284,7 @@ const HistoryPage = () => {
                                     </div>
                                 </motion.div>
                             ))}
+
                         </div>
 
                         {totalPages > 1 && (
