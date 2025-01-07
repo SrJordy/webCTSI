@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { getAllUsers, deleteUser } from "../service/UserService";
-import { FaEdit, FaTrashAlt, FaSearch, FaFilter, FaDownload } from "react-icons/fa";
+import { FaEdit, FaTrashAlt, FaSearch, FaFilter, FaDownload, FaPlus } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import MainLayout from "../layouts/MainLayout";
 import ConfirmModal from "../components/ConfirmModal";
@@ -127,8 +127,8 @@ const ManageUsersPage = () => {
                         className="bg-pastel-red text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors duration-300 flex items-center gap-2"
                         onClick={() => setIsModalOpen(true)}
                     >
-                        <span>Nuevo Usuario</span>
-                        <span className="text-xl">+</span>
+                        <FaPlus className="mr-2" />
+                        Nuevo Usuario
                     </motion.button>
                 </div>
 

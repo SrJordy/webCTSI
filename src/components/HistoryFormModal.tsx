@@ -384,7 +384,7 @@ const HistoryFormModal: React.FC<HistoryFormModalProps> = ({
                                             <FaNotesMedical className="absolute left-3 top-3 text-gray-400" />
                                             <textarea
                                                 value={formData.descripcion}
-                                                onChange={(e) => setFormData({ ...formData, descripcion })}
+                                                onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
                                                 placeholder="Observaciones y notas adicionales"
                                                 className="pl-10 w-full p-2 border rounded-lg focus:ring-2 focus:ring-primary"
                                                 rows={4}

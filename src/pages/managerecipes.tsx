@@ -120,7 +120,7 @@ export const RecetasListPage = () => {
                         <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center"
+                            className="bg-pastel-red text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors duration-300 flex items-center gap-2"
                             onClick={() => navigate('/Receta')}
                         >
                             <FaPlus className="mr-2" />
@@ -204,25 +204,25 @@ export const RecetasListPage = () => {
                                                     <motion.button
                                                         whileHover={{ scale: 1.1 }}
                                                         whileTap={{ scale: 0.9 }}
-                                                        className="text-blue-500 hover:text-blue-600 mr-2"
+                                                        className="text-yellow-500 hover:text-yellow-700 mr-2"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             navigate(`/receta/${receta.cod_receta}`);
                                                         }}
                                                     >
-                                                        <FaEdit />
+                                                        <FaEdit size={20} />
                                                     </motion.button>
                                                     <motion.button
                                                         whileHover={{ scale: 1.1 }}
                                                         whileTap={{ scale: 0.9 }}
-                                                        className="text-red-500 hover:text-red-600"
+                                                        className="text-red-500 hover:text-red-700"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             setSelectedReceta(receta);
                                                             setShowDeleteModal(true);
                                                         }}
                                                     >
-                                                        <FaTrash />
+                                                        <FaTrash size={20}/>
                                                     </motion.button>
                                                 </div>
                                             </div>

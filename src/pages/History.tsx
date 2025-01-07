@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { FaSearch, FaDownload, FaEye, FaEdit, FaTrashAlt, FaCalendar } from 'react-icons/fa';
+import { FaSearch, FaDownload, FaEye, FaEdit, FaTrashAlt, FaCalendar, FaPlus } from 'react-icons/fa';
 import MainLayout from '../layouts/MainLayout';
 import { HistoryService } from '../service/HistoryService';
 import { toast } from 'react-hot-toast';
@@ -73,25 +73,23 @@ const HistoryPage = () => {
         return histories.filter(history => {
             if (!history || !history.persona) return false;
 
-            // Filtrado por nombre completo
             const nombreCompleto = `${history.persona.nombre} ${history.persona.apellido}`.toLowerCase();
             const matchesSearch = nombreCompleto.includes(searchTerm.toLowerCase());
 
-            // Filtrado por fecha
             let matchesDate = true;
             if (filterDate) {
                 let recetaDate: Date;
                 if (typeof history.fecha === 'string') {
                     recetaDate = new Date(history.fecha);
                 } else {
-                    recetaDate = history.fecha; // Asumimos que ya es un objeto Date
+                    recetaDate = history.fecha; 
                 }
 
                 if (isNaN(recetaDate.getTime())) {
                     console.error(`Fecha inválida para historial con ID ${history.cod_historial}: ${history.fecha}`);
                     matchesDate = false; 
                 } else {
-                    matchesDate = recetaDate.toISOString().split('T')[0] === filterDate; // Comparar con el formato YYYY-MM-DD
+                    matchesDate = recetaDate.toISOString().split('T')[0] === filterDate; 
                 }
             }
 
@@ -162,13 +160,14 @@ const HistoryPage = () => {
                     <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+                        className="bg-pastel-red text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors duration-300 flex items-center gap-2"
                         onClick={() => {
                             setHistorialToEdit(null);
                             setIsFormModalOpen(true);
                         }}
                     >
-                        <span>Nuevo Historial</span>
+                        <FaPlus className="mr-2" />
+                        Nuevo Historial
                     </motion.button>
                 </div>
 

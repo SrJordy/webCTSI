@@ -20,6 +20,14 @@ const LoginForm = () => {
         try {
             const response = await loginWithCredentials(email, password);
             const { token, user } = response;
+
+            // Validar el rol del usuario
+            if (user.rol !== 'PROFESIONAL') {
+                setError('Acceso denegado: solo los profesionales pueden ingresar.');
+                setIsLoading(false);
+                return;
+            }
+
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
             navigate('/dashboard');

@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { FaSearch, FaEdit, FaTrashAlt } from 'react-icons/fa';
+import { FaSearch, FaEdit, FaTrashAlt, FaPlus } from 'react-icons/fa';
 import MainLayout from '../layouts/MainLayout';
 import { TratamientoService } from '../service/TratamientoService';
 import { toast } from 'react-hot-toast';
@@ -102,13 +102,14 @@ const TratamientosListPage = () => {
                     <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2"
+                        className="bg-pastel-red text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors duration-300 flex items-center gap-2"
                         onClick={() => {
                             setTratamientoToEdit(null);
                             setIsFormModalOpen(true);
                         }}
                     >
-                        <span>Nuevo Tratamiento</span>
+                        <FaPlus className="mr-2" />
+                        Nuevo Tratamiento
                     </motion.button>
                 </div>
 
