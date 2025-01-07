@@ -108,7 +108,7 @@ export const RecetasListPage = () => {
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="min-h-screen bg-gradient-to-br from-red-50 to-pink-50 -m-8 p-8"
+                className="min-h-screen  -m-8 p-8"
             >
                 <div className="max-w-7xl mx-auto">
                     <motion.div

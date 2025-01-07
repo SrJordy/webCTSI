@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { FaSearch, FaEye, FaEdit, FaTrashAlt } from 'react-icons/fa';
+import { FaSearch, FaEdit, FaTrashAlt } from 'react-icons/fa';
 import MainLayout from '../layouts/MainLayout';
 import { TratamientoService } from '../service/TratamientoService';
 import { toast } from 'react-hot-toast';
@@ -90,7 +90,7 @@ const TratamientosListPage = () => {
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="h-full flex flex-col overflow-hidden"
+                className="min-h-full  -m-8 p-8"
             >
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-3xl font-bold text-gray-800">
