@@ -141,8 +141,8 @@ const HistoryFormModal: React.FC<HistoryFormModalProps> = ({
                 ...formData,
                 peso: Number(formData.peso),
                 estatura: Number(formData.estatura),
-                temperatura: formData.temperatura ? Number(formData.temperatura) : null,
-                nivel_glucosa: formData.nivel_glucosa ? Number(formData.nivel_glucosa) : null,
+                temperatura: formData.temperatura ? Number(formData.temperatura) : undefined,
+                nivel_glucosa: formData.nivel_glucosa ? Number(formData.nivel_glucosa) : undefined,
                 persona_id: selectedPatient?.cod_paciente || formData.persona_id,
                 fecha: new Date(formData.fecha)
             };
@@ -177,7 +177,7 @@ const HistoryFormModal: React.FC<HistoryFormModalProps> = ({
 
     const handleSuccessModalClose = () => {
         setShowSuccessModal(false);
-        onSubmit(formData);
+        onSubmit();
         onClose();
     };
 
