@@ -21,7 +21,6 @@ const LoginForm = () => {
             const response = await loginWithCredentials(email, password);
             const { token, user } = response;
 
-            // Validar el rol del usuario
             if (user.rol !== 'PROFESIONAL') {
                 setError('Acceso denegado: solo los profesionales pueden ingresar.');
                 setIsLoading(false);
@@ -55,7 +54,7 @@ const LoginForm = () => {
                         className="flex justify-center"
                     >
                         {/* Aquí puedes agregar tu logo */}
-                        <div className="w-20 h-20 bg-pastel-red rounded-full flex items-center justify-center">
+                        <div className="w-20 h-20 bg-[#C9E7F2] rounded-full flex items-center justify-center">
                             <MdLock className="w-10 h-10 text-white" />
                         </div>
                     </motion.div>
@@ -141,7 +140,7 @@ const LoginForm = () => {
                         whileTap={{ scale: 0.99 }}
                         type="submit"
                         disabled={isLoading}
-                        className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-pastel-red hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pastel-red transition-colors ${
+                        className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-[#C9E7F2] hover:bg-[#035AA6] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pastel-red transition-colors ${
                             isLoading ? 'opacity-75 cursor-not-allowed' : ''
                         }`}
                     >

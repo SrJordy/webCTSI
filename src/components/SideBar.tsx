@@ -53,10 +53,10 @@ const Sidebar = () => {
             initial={{ width: isOpen ? 256 : 80 }}
             animate={{ width: isOpen ? 256 : 80 }}
             transition={{ duration: 0.3 }}
-            className="h-screen bg-gradient-to-b from-pastel-red to-red-600 text-white relative"
+            className="h-screen bg-gradient-to-b from-[#035AA6] to-[#020659] text-white relative"
         >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-red-400/30">
+            <div className="flex items-center justify-between p-4 border-b border-[#020873]">
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -64,7 +64,7 @@ const Sidebar = () => {
                     className="flex items-center gap-3"
                 >
                     <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                        <span className="text-pastel-red font-bold text-xl">C</span>
+                        <span className="text-[#020659] font-bold text-xl">C</span>
                     </div>
                     <AnimatePresence>
                         {isOpen && (
@@ -81,16 +81,16 @@ const Sidebar = () => {
                 </motion.div>
                 <button
                     onClick={() => setIsOpen(!isOpen)}
-                    className="p-2 hover:bg-red-500/30 rounded-lg transition-colors"
+                    className="p-2 hover:bg-[#C9E7F2] rounded-lg transition-colors"
                 >
                     {isOpen ? <MdChevronLeft size={24} /> : <MdChevronRight size={24} />}
                 </button>
             </div>
 
             {/* User Profile */}
-            <div className="p-4 border-b border-red-400/30">
+            <div className="p-4 border-b border-[#020659]">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center">
+                    <div className="w-10 h-10 bg-[#035AA6] rounded-full flex items-center justify-center">
                         <MdPerson size={24} />
                     </div>
                     <AnimatePresence>
@@ -101,7 +101,7 @@ const Sidebar = () => {
                                 exit={{ opacity: 0, x: -20 }}
                             >
                                 <p className="font-medium">{user?.nombre}</p>
-                                <p className="text-sm text-red-200">{user?.rol}</p>
+                                <p className="font-bold text-sm text-white">{user?.rol}</p>
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -119,7 +119,7 @@ const Sidebar = () => {
                             className={`flex items-center gap-3 p-3 rounded-lg transition-colors relative
                                 ${isActive 
                                     ? 'bg-white/20 text-white' 
-                                    : 'hover:bg-red-500/30 text-red-100'}`}
+                                    : 'hover:bg-[#035AA6] text-white font-semibold'}`}
                         >
                             <item.icon size={24} />
                             <AnimatePresence>
@@ -136,7 +136,7 @@ const Sidebar = () => {
                             </AnimatePresence>
                             {item.badge && (
                                 <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                    <div className="bg-white text-pastel-red text-xs font-bold px-2 py-1 rounded-full">
+                                    <div className="bg-white text-[#035AA6] text-xs font-bold px-2 py-1 rounded-full">
                                         {item.badge}
                                     </div>
                                 </div>
@@ -147,10 +147,10 @@ const Sidebar = () => {
             </nav>
 
             {/* Logout Button */}
-            <div className="absolute bottom-0 w-full p-4 border-t border-red-400/30">
+            <div className="absolute bottom-0 w-full p-4 border-t border-[#020873]">
                 <button
                     onClick={handleLogout}
-                    className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-red-500/30 transition-colors text-red-100"
+                    className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-[#035AA6] transition-colors text-red-100"
                 >
                     <MdExitToApp size={24} />
                     <AnimatePresence>
