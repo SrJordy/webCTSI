@@ -6,7 +6,6 @@ import MainLayout from "../layouts/MainLayout";
 import ConfirmModal from "../components/ConfirmModal";
 import UserFormModal from "../components/UserFormModal";
 import { toast } from "react-hot-toast";
-import { Console } from "console";
 
 interface User {
     cod_usuario: number;

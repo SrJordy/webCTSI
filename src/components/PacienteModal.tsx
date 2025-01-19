@@ -127,7 +127,7 @@ const PacienteFormModal: React.FC<PacienteFormModalProps> = ({
         try {
             const data = {
                 ...formData,
-                CID: parseInt(formData.CID),
+                CID: formData.CID,
                 telefono: formData.telefono,
                 cuidador_id: parseInt(formData.cuidador_id)
             };
@@ -159,7 +159,7 @@ const PacienteFormModal: React.FC<PacienteFormModalProps> = ({
 
     const handleSuccessModalClose = () => {
         setShowSuccessModal(false);
-        onSubmit(formData);
+        onSubmit();
         onClose();
     };
 

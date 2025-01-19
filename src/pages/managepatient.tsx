@@ -1,11 +1,12 @@
 import { useEffect, useState, useMemo } from "react";
 import { getAllPacientes, deletePaciente } from "../service/PacienteService";
-import { FaEdit, FaTrashAlt, FaSearch, FaFilter, FaDownload, FaHistory } from "react-icons/fa";
+import { FaEdit, FaTrashAlt, FaSearch, FaFilter, FaDownload, FaPlus} from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import MainLayout from "../layouts/MainLayout";
 import ConfirmModal from "../components/ConfirmModal";
 import PacienteFormModal from "../components/PacienteModal";
 import { toast } from "react-hot-toast";
+
 
 interface Paciente {
     cod_paciente: number;
@@ -13,7 +14,7 @@ interface Paciente {
     apellido: string;
     CID: string;
     telefono: string;
-    fecha_nacimiento: string;
+    fecha_nac: string;
     genero: string;
     cod_cuidador: number;
     cuidador?: {
@@ -150,11 +151,10 @@ const ManagePatientsPage = () => {
                     <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="bg-pastel-red text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors duration-300 flex items-center gap-2"
+                        className="bg-[#5FAAD9] text-white px-6 py-2 rounded-lg hover:bg-[#035AA6] transition-colors duration-300 flex items-center gap-2"
                         onClick={() => setIsModalOpen(true)}
                     >
-                        <span>Nuevo Paciente</span>
-                        <span className="text-xl">+</span>
+                        <FaPlus className="mr-2" /> Nuevo Paciente
                     </motion.button>
                 </div>
 
@@ -167,7 +167,7 @@ const ManagePatientsPage = () => {
                                 <input
                                     type="text"
                                     placeholder="Buscar pacientes..."
-                                    className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-pastel-red focus:border-transparent"
+                                    className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#020659] focus:border-transparent"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
@@ -176,7 +176,7 @@ const ManagePatientsPage = () => {
                         <div className="flex items-center gap-2">
                             <FaFilter className="text-gray-400" />
                             <select
-                                className="border rounded-lg px-4 py-2 focus:ring-2 focus:ring-pastel-red focus:border-transparent"
+                                className="border rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#020659] focus:border-transparent"
                                 value={filterGender}
                                 onChange={(e) => setFilterGender(e.target.value)}
                             >
@@ -188,7 +188,7 @@ const ManagePatientsPage = () => {
                         </div>
                         <button
                             onClick={exportToCSV}
-                            className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                            className="flex items-center gap-2 px-4 py-2 bg-[#5FAAD9] text-white rounded-lg hover:bg-[#035AA6] transition-colors"
                         >
                             <FaDownload />
                             <span>Exportar CSV</span>
@@ -309,7 +309,7 @@ const ManagePatientsPage = () => {
                                             onClick={() => setCurrentPage(page)}
                                             className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium
                                                 ${currentPage === page
-                                                    ? "z-10 bg-pastel-red border-pastel-red text-white"
+                                                    ? "z-10 bg-[#5FAAD9]  text-white"
                                                     : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
                                                 }`}
                                         >
