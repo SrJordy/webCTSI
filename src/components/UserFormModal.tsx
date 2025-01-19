@@ -106,9 +106,9 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
 
         setIsSubmitting(true);
         try {
-            const data = {
+            const data: { [key: string]: any, password?: string } = {
                 ...formData,
-                CID: parseInt(formData.CID, 10),
+                CID: formData.CID,
                 telefono: formData.telefono, // Como string
             };
 
@@ -117,6 +117,7 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
                 await updateUser(userToEdit.cod_usuario, data);
                 setSuccessMessage("Usuario actualizado exitosamente");
             } else {
+                console.log("datos del USUARIO:", data)
                 await createUser(data);
                 setSuccessMessage("Usuario creado exitosamente");
             }

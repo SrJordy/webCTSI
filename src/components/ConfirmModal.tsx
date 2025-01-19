@@ -78,7 +78,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 
-                                             transition-colors duration-200 font-medium"
+                                            transition-colors duration-200 font-medium"
                                     onClick={onClose}
                                 >
                                     Cancelar
@@ -87,7 +87,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 
-                                             transition-colors duration-200 font-medium flex items-center"
+                                            transition-colors duration-200 font-medium flex items-center"
                                     onClick={onConfirm}
                                 >
                                     <motion.span

@@ -1,11 +1,11 @@
 import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
-const USERS_URL = `${API_URL}/ApiUser`;
 
 export const getAllUsers = async (): Promise<any> => {
     try {
-        const response = await axios.get(USERS_URL);
+        const response = await axios.get(`${API_URL}/userall`);
+        console.log("DATOS DE LOS getAllUsersWithRelations",response.data)
         return response.data;
     } catch (error) {
         console.error("Error al obtener los usuarios", error);
@@ -15,7 +15,7 @@ export const getAllUsers = async (): Promise<any> => {
 
 export const getUser = async (criteria: any): Promise<any> => {
     try {
-        const response = await axios.get(USERS_URL, { params: criteria });
+        const response = await axios.get(`${API_URL}/user`, { params: criteria });
         return response.data;
     } catch (error) {
         console.error("Error al obtener el usuario", error);
@@ -25,7 +25,7 @@ export const getUser = async (criteria: any): Promise<any> => {
 
 export const createUser = async (data: any): Promise<any> => {
     try {
-        const response = await axios.post(USERS_URL, data);
+        const response = await axios.post(`${API_URL}/createuser`, data);
         return response.data;
     } catch (error) {
         console.error("Error al crear el usuario", error);
@@ -36,7 +36,7 @@ export const createUser = async (data: any): Promise<any> => {
 
 export const updateUser = async (id: number, data: any): Promise<any> => {
     try {
-        const response = await axios.put(`${USERS_URL}?id=${id}`, data);
+        const response = await axios.put(`${API_URL}/updateuser?id=${id}`, data);
         return response.data;
     } catch (error) {
         console.error("Error al actualizar el usuario", error);
@@ -46,7 +46,7 @@ export const updateUser = async (id: number, data: any): Promise<any> => {
 
 export const deleteUser = async (id: number): Promise<any> => {
     try {
-        const response = await axios.delete(`${USERS_URL}?id=${id}`);
+        const response = await axios.delete(`${API_URL}/deleteuser?id=${id}`);
         return response.data;
     } catch (error) {
         console.error("Error al eliminar el usuario", error);
