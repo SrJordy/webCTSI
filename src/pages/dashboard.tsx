@@ -42,7 +42,7 @@ const DashboardPage = () => {
         return (
             <MainLayout>
                 <div className="flex items-center justify-center min-h-screen">
-                    <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-pastel-red"></div>
+                    <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-[#020659]"></div>
                 </div>
             </MainLayout>
         );
@@ -58,13 +58,13 @@ const DashboardPage = () => {
                 className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
             >
                 {/* Header Section */}
-                <div className="bg-gradient-to-r from-pastel-red to-red-400 rounded-2xl p-8 mb-8 text-white shadow-lg">
+                <div className="bg-gradient-to-r from-[#5FAAD9] to-[#035AA6] rounded-2xl p-8 mb-8 text-white shadow-lg">
                     <div className="flex items-center justify-between">
                         <div>
                             <h1 className="text-4xl font-bold mb-2">
                                 Bienvenido, {userData?.nombre}
                             </h1>
-                            <p className="text-red-100">
+                            <p className="text-white font-semibold">
                                 Panel de Control | {userData?.rol}
                             </p>
                         </div>
@@ -72,7 +72,7 @@ const DashboardPage = () => {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={handleLogout}
-                            className="flex items-center space-x-2 bg-white text-pastel-red px-4 py-2 rounded-lg hover:bg-red-50 transition-colors"
+                            className="flex items-center space-x-2 bg-white text-[#5FAAD9] px-4 py-2 rounded-lg hover:bg-[#C9E7F2] transition-colors"
                         >
                             <MdExitToApp className="text-xl" />
                             <span>Cerrar sesión</span>
@@ -93,8 +93,8 @@ const DashboardPage = () => {
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="flex items-center space-x-4">
-                            <div className="bg-red-100 p-3 rounded-lg">
-                                <MdPerson className="text-2xl text-pastel-red" />
+                            <div className="bg-[#5FAAD9] p-3 rounded-lg">
+                                <MdPerson className="text-2xl text-white" />
                             </div>
                             <div>
                                 <p className="text-sm text-gray-500">Nombre</p>
@@ -103,8 +103,8 @@ const DashboardPage = () => {
                         </div>
 
                         <div className="flex items-center space-x-4">
-                            <div className="bg-red-100 p-3 rounded-lg">
-                                <MdEmail className="text-2xl text-pastel-red" />
+                            <div className="bg-[#5FAAD9] p-3 rounded-lg">
+                                <MdEmail className="text-2xl text-white" />
                             </div>
                             <div>
                                 <p className="text-sm text-gray-500">Email</p>
@@ -113,8 +113,8 @@ const DashboardPage = () => {
                         </div>
 
                         <div className="flex items-center space-x-4">
-                            <div className="bg-red-100 p-3 rounded-lg">
-                                <MdSecurity className="text-2xl text-pastel-red" />
+                            <div className="bg-[#5FAAD9] p-3 rounded-lg">
+                                <MdSecurity className="text-2xl text-white" />
                             </div>
                             <div>
                                 <p className="text-sm text-gray-500">Rol</p>
@@ -123,8 +123,8 @@ const DashboardPage = () => {
                         </div>
 
                         <div className="flex items-center space-x-4">
-                            <div className="bg-red-100 p-3 rounded-lg">
-                                <MdCheckCircle className="text-2xl text-pastel-red" />
+                            <div className="bg-[#5FAAD9] p-3 rounded-lg">
+                                <MdCheckCircle className="text-2xl text-white" />
                             </div>
                             <div>
                                 <p className="text-sm text-gray-500">Estado</p>
