@@ -6,7 +6,6 @@ import { TratamientoService } from '../service/TratamientoService';
 import { toast } from 'react-hot-toast';
 import ConfirmModal from '../components/ConfirmModal';
 import TratamientoFormModal from '../components/TratamientoFormModal';
-import { useNavigate } from 'react-router-dom';
 
 interface Tratamiento {
     cod_tratamiento: number;
@@ -39,7 +38,6 @@ const TratamientosListPage = () => {
     const [tratamientoToEdit, setTratamientoToEdit] = useState<Tratamiento | null>(null);
 
     const itemsPerPage = 8;
-    const navigate = useNavigate();
 
     const fetchTratamientos = async () => {
         setIsLoading(true);

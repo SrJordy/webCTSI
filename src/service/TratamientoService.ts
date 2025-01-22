@@ -2,7 +2,6 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 
 const API_URL = import.meta.env.VITE_API_URL; 
-const TRATAMIENTO_URL = `${API_URL}/ApiTratamiento`;
 
 interface Persona {
     cod_paciente: number;
@@ -86,7 +85,7 @@ const validateTratamiento = (tratamientoData: Tratamiento) => {
 export const TratamientoService = {
     async getAllTratamientos(): Promise<Tratamiento[]> {
         try {
-            const response = await axios.get(TRATAMIENTO_URL, axiosConfig);
+            const response = await axios.get(`${API_URL}/getAllTreatments`);
             console.log(response.data);
             return response.data;
         } catch (error) {
@@ -98,7 +97,7 @@ export const TratamientoService = {
 
     async getTratamiento(id: number): Promise<Tratamiento> {
         try {
-            const response = await axios.get(`${TRATAMIENTO_URL}?id=${id}`, axiosConfig);
+            const response = await axios.get(`${API_URL}/getTreatment?id=${id}`);
             return response.data;
         } catch (error) {
             console.error("Error al obtener el tratamiento", error);
@@ -111,7 +110,8 @@ export const TratamientoService = {
         validateTratamiento(tratamientoData); 
 
         try {
-            const response = await axios.post(TRATAMIENTO_URL, tratamientoData, axiosConfig);
+            console.log("tratamientoData", tratamientoData);
+            const response = await axios.post(`${API_URL}/createTreatment`, tratamientoData);
             toast.success('Tratamiento creado exitosamente');
             return response.data;
         } catch (error) {
@@ -127,7 +127,7 @@ export const TratamientoService = {
         }
 
         try {
-            const response = await axios.put(`${TRATAMIENTO_URL}?id=${id}`, tratamientoData, axiosConfig);
+            const response = await axios.put(`${API_URL}/updateTreatment?id=${id}`, tratamientoData);
             toast.success('Tratamiento actualizado exitosamente');
             return response.data;
         } catch (error) {
@@ -139,7 +139,7 @@ export const TratamientoService = {
 
     async deleteTratamiento(id: number): Promise<void> {
         try {
-            await axios.delete(`${TRATAMIENTO_URL}?id=${id}`, axiosConfig);
+            await axios.delete(`${API_URL}/deleteTreatment?id=${id}`, axiosConfig);
             toast.success('Tratamiento eliminado exitosamente');
         } catch (error) {
             console.error("Error al eliminar el tratamiento", error);

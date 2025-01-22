@@ -11,7 +11,12 @@ interface Tratamiento {
     fechainicio: Date | string;
     fechafin: Date | string;
     historial_id: number;
-    pacienteNombre?: string; // Para almacenar el nombre del paciente
+    historial: {
+        persona: {
+            nombre: string;
+            apellido: string;
+        };
+    };
 }
 
 interface TratamientoFormModalProps {
@@ -27,25 +32,18 @@ const TratamientoFormModal: React.FC<TratamientoFormModalProps> = ({
     onSubmit,
     tratamientoToEdit
 }) => {
-    const getProfesionalId = (): number => {
-        try {
-            const userString = localStorage.getItem('user');
-            if (userString) {
-                const user = JSON.parse(userString);
-                return user.cod_usuario;
-            }
-            return 0;
-        } catch (error) {
-            console.error('Error al obtener el ID del profesional:', error);
-            return 0;
-        }
-    };
 
     const [formData, setFormData] = useState({
         descripcion: '',
         fechainicio: new Date().toISOString().split('T')[0],
         fechafin: new Date().toISOString().split('T')[0],
-        profesional_id: getProfesionalId(),
+        historial_id: 0,
+    });
+
+    const [displayFormData, setDisplayFormData] = useState({
+        descripcion: '',
+        fechainicio: new Date().toISOString().split('T')[0],
+        fechafin: new Date().toISOString().split('T')[0],
         historial_id: 0,
         pacienteNombre: ''
     });
@@ -57,18 +55,21 @@ const TratamientoFormModal: React.FC<TratamientoFormModalProps> = ({
 
     useEffect(() => {
         if (isOpen) {
-            const profesionalId = getProfesionalId();
 
             if (tratamientoToEdit) {
                 setFormData({
                     descripcion: tratamientoToEdit.descripcion || '',
                     fechainicio: new Date(tratamientoToEdit.fechainicio).toISOString().split('T')[0],
                     fechafin: new Date(tratamientoToEdit.fechafin).toISOString().split('T')[0],
-                    profesional_id: profesionalId,
-                    historial_id: tratamientoToEdit.historial_id, 
-                    pacienteNombre: tratamientoToEdit.historial.persona.nombre + ' ' + tratamientoToEdit.historial.persona.apellido
+                    historial_id: tratamientoToEdit.historial_id,
                 });
-                console.log('Datos del tratamiento a editar:', tratamientoToEdit);
+                setDisplayFormData({
+                    descripcion: tratamientoToEdit.descripcion || '',
+                    fechainicio: new Date(tratamientoToEdit.fechainicio).toISOString().split('T')[0],
+                    fechafin: new Date(tratamientoToEdit.fechafin).toISOString().split('T')[0],
+                    historial_id: tratamientoToEdit.historial_id,
+                    pacienteNombre: `${tratamientoToEdit.historial.persona.nombre} ${tratamientoToEdit.historial.persona.apellido}`
+                });
             } else {
                 resetForm();
             }
@@ -76,12 +77,16 @@ const TratamientoFormModal: React.FC<TratamientoFormModalProps> = ({
     }, [isOpen, tratamientoToEdit]);
 
     const resetForm = () => {
-        const profesionalId = getProfesionalId();
         setFormData({
             descripcion: '',
             fechainicio: new Date().toISOString().split('T')[0],
             fechafin: new Date().toISOString().split('T')[0],
-            profesional_id: profesionalId,
+            historial_id: 0,
+        });
+        setDisplayFormData({
+            descripcion: '',
+            fechainicio: new Date().toISOString().split('T')[0],
+            fechafin: new Date().toISOString().split('T')[0],
             historial_id: 0,
             pacienteNombre: ''
         });
@@ -92,10 +97,6 @@ const TratamientoFormModal: React.FC<TratamientoFormModalProps> = ({
         setIsLoading(true);
 
         try {
-            if (!formData.profesional_id) {
-                toast.error('No se pudo identificar al profesional');
-                return;
-            }
 
             const dataToSubmit = {
                 ...formData,
@@ -122,9 +123,14 @@ const TratamientoFormModal: React.FC<TratamientoFormModalProps> = ({
 
             onSubmit();
             onClose();
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Error en handleSubmit:', error);
-            toast.error(error.response?.data?.error || error.message || 'Error al procesar el tratamiento');
+            if (error instanceof Error) {
+                const errorMessage = (error as { response?: { data?: { error?: string } } }).response?.data?.error || error.message || 'Error al procesar el tratamiento';
+                toast.error(errorMessage);
+            } else {
+                toast.error('Error al procesar el tratamiento');
+            }
         } finally {
             setIsLoading(false);
         }
@@ -167,9 +173,9 @@ const TratamientoFormModal: React.FC<TratamientoFormModalProps> = ({
                                                 type="button"
                                                 onClick={() => setIsSelectHistorialModalOpen(true)}
                                                 className={`w-full p-2 border rounded-lg text-left text-gray-500 hover:bg-gray-50 ${tratamientoToEdit ? 'cursor-not-allowed opacity-50' : ''}`}
-                                                disabled={!!tratamientoToEdit} 
+                                                disabled={!!tratamientoToEdit}
                                             >
-                                                {formData.historial_id ? `Historial de: ${formData.pacienteNombre}` : 'Seleccionar historial...'}
+                                                {displayFormData.historial_id ? `Historial de: ${displayFormData.pacienteNombre}` : 'Seleccionar historial...'}
                                             </button>
                                         </div>
                                     </div>
@@ -179,8 +185,11 @@ const TratamientoFormModal: React.FC<TratamientoFormModalProps> = ({
                                             Descripción
                                         </label>
                                         <textarea
-                                            value={formData.descripcion}
-                                            onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+                                            value={displayFormData.descripcion}
+                                            onChange={(e) => {
+                                                setFormData({ ...formData, descripcion: e.target.value });
+                                                setDisplayFormData({ ...displayFormData, descripcion: e.target.value });
+                                            }}
                                             placeholder="Descripción del tratamiento"
                                             className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                                             rows={4}
@@ -195,8 +204,11 @@ const TratamientoFormModal: React.FC<TratamientoFormModalProps> = ({
                                             </label>
                                             <input
                                                 type="date"
-                                                value={formData.fechainicio}
-                                                onChange={(e) => setFormData({ ...formData, fechainicio: e.target.value })}
+                                                value={displayFormData.fechainicio}
+                                                onChange={(e) => {
+                                                    setFormData({ ...formData, fechainicio: e.target.value });
+                                                    setDisplayFormData({ ...displayFormData, fechainicio: e.target.value });
+                                                }}
                                                 className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                                                 required
                                             />
@@ -207,8 +219,11 @@ const TratamientoFormModal: React.FC<TratamientoFormModalProps> = ({
                                             </label>
                                             <input
                                                 type="date"
-                                                value={formData.fechafin}
-                                                onChange={(e) => setFormData({ ...formData, fechafin: e.target.value })}
+                                                value={displayFormData.fechafin}
+                                                onChange={(e) => {
+                                                    setFormData({ ...formData, fechafin: e.target.value });
+                                                    setDisplayFormData({ ...displayFormData, fechafin: e.target.value });
+                                                }}
                                                 className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                                                 required
                                             />
@@ -245,8 +260,12 @@ const TratamientoFormModal: React.FC<TratamientoFormModalProps> = ({
                 onSelect={(historial) => {
                     setFormData((prev) => ({
                         ...prev,
+                        historial_id: historial.cod_historial
+                    }));
+                    setDisplayFormData((prev) => ({
+                        ...prev,
                         historial_id: historial.cod_historial,
-                        pacienteNombre: `${historial.persona?.nombre} ${historial.persona?.apellido}` // Establecer el nombre del paciente
+                        pacienteNombre: `${historial.persona?.nombre} ${historial.persona?.apellido}`
                     }));
                     setIsSelectHistorialModalOpen(false);
                 }}
