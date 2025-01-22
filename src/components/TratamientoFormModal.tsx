@@ -10,18 +10,12 @@ interface Tratamiento {
     descripcion: string;
     fechainicio: Date | string;
     fechafin: Date | string;
-    profesional_id?: number;
     persona_id?: number;
     estado?: boolean;
     historial_id: number; 
     historial?: { 
         persona?: {
             cod_paciente: number;
-            nombre: string;
-            apellido: string;
-        };
-        profesional?: {
-            cod_usuario: number;
             nombre: string;
             apellido: string;
         };
