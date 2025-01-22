@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaWeight, FaRuler, FaThermometerHalf, FaTint, FaHeartbeat, FaNotesMedical } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
@@ -79,6 +79,23 @@ const HistoryFormModal: React.FC<HistoryFormModalProps> = ({
         persona_id: 0
     });
 
+    const resetForm = useCallback(() => {
+        const profesionalId = getProfesionalId();
+        setFormData({
+            descripcion: '',
+            tipo_sangre: '',
+            presion_arterial: '',
+            peso: '',
+            estatura: '',
+            temperatura: '',
+            nivel_glucosa: '',
+            fecha: new Date().toISOString().split('T')[0],
+            profesional_id: profesionalId,
+            persona_id: 0
+        });
+        setSelectedPatient(null);
+    }, []);
+    
     const [isLoading, setIsLoading] = useState(false);
     const [isSelectPatientModalOpen, setIsSelectPatientModalOpen] = useState(false);
     const [selectedPatient, setSelectedPatient] = useState<Paciente | null>(null);
@@ -108,25 +125,8 @@ const HistoryFormModal: React.FC<HistoryFormModalProps> = ({
                 resetForm();
             }
         }
-    }, [isOpen, historialToEdit]);
-
-    const resetForm = () => {
-        const profesionalId = getProfesionalId();
-        setFormData({
-            descripcion: '',
-            tipo_sangre: '',
-            presion_arterial: '',
-            peso: '',
-            estatura: '',
-            temperatura: '',
-            nivel_glucosa: '',
-            fecha: new Date().toISOString().split('T')[0],
-            profesional_id: profesionalId,
-            persona_id: 0
-        });
-        setSelectedPatient(null);
-    };
-
+    }, [isOpen, historialToEdit,resetForm]);
+    
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
