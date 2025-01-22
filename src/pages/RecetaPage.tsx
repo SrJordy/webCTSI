@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import * as RecetaService from '../service/RecetaService';
 import SelectPatientModal from '../components/SelectPatientModal';
 import axios from 'axios';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 interface Paciente {
     cod_paciente: number;

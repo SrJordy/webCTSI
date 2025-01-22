@@ -167,9 +167,14 @@ const HistoryFormModal: React.FC<HistoryFormModalProps> = ({
 
             onSubmit();
             onClose();
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Error en handleSubmit:', error);
-            toast.error(error.response?.data?.error || error.message || 'Error al procesar el historial médico');
+            if (error instanceof Error) {
+                const errorMessage = (error as { response?: { data?: { error?: string } } }).response?.data?.error || error.message || 'Error al procesar el historial médico';
+                toast.error(errorMessage);
+            } else {
+                toast.error('Error al procesar el historial médico');
+            }
         } finally {
             setIsLoading(false);
         }

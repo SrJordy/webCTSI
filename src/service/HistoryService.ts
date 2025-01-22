@@ -76,13 +76,12 @@ class HistoryServiceError extends Error {
     }
 }
 const API_URL = import.meta.env.VITE_API_URL;
-const BASE_URL = `${API_URL}/ApiHistorial`;
 
 
 export const HistoryService = {
     async getAllHistories(): Promise<HistorialMedico[]> {
         try {
-            const response = await axios.get(BASE_URL);
+            const response = await axios.get(`${API_URL}/historyall`);
             return response.data;
         } catch (error) {
             console.error('Error fetching medical histories:', error);
@@ -93,7 +92,7 @@ export const HistoryService = {
 
     async getHistory(id: number): Promise<HistorialMedico> {
         try {
-            const response = await axios.get(`${BASE_URL}?id=${id}`);
+            const response = await axios.get(`${API_URL}/history?id=${id}`);
             console.log(response.data);
             return response.data;
         } catch (error) {
@@ -135,7 +134,7 @@ export const HistoryService = {
                 throw new HistoryServiceError('La temperatura debe estar entre 35°C y 42°C', 'VALIDATION_ERROR');
             }
 
-            const response = await axios.post(BASE_URL, {
+            const response = await axios.post(`${API_URL}/createHistory`, {
                 ...data,
                 fecha: new Date(data.fecha)
             });
@@ -170,7 +169,7 @@ export const HistoryService = {
                 throw new HistoryServiceError('La temperatura debe estar entre 35°C y 42°C', 'VALIDATION_ERROR');
             }
 
-            const response = await axios.put(`${BASE_URL}?id=${id}`, {
+            const response = await axios.put(`${API_URL}/updatehistory?id=${id}`, {
                 ...data,
                 fecha: data.fecha ? new Date(data.fecha) : undefined
             });
@@ -186,7 +185,7 @@ export const HistoryService = {
 
     async deleteHistory(id: number): Promise<void> {
         try {
-            await axios.delete(`${BASE_URL}?id=${id}`);
+            await axios.delete(`${API_URL}/deleteHistory?id=${id}`);
             toast.success('Historial médico eliminado exitosamente');
         } catch (error) {
             console.error('Error deleting medical history:', error);

@@ -17,7 +17,7 @@ interface HistorialMedico {
     estatura: number;
     temperatura?: number;
     nivel_glucosa?: number;
-    fecha: Date | string; // Asegúrate de que este campo pueda ser un string o un objeto Date
+    fecha: Date | string; 
     profesional_id: number;
     persona_id: number;
     estado: boolean;
@@ -121,7 +121,7 @@ const HistoryPage = () => {
         const csvContent = [
             headers.join(','),
             ...filteredHistories.map(history => {
-                let fecha = typeof history.fecha === 'string' ? new Date(history.fecha) : history.fecha;
+                const fecha = typeof history.fecha === 'string' ? new Date(history.fecha) : history.fecha;
                 return [
                     fecha.toISOString().split('T')[0], // Formato YYYY-MM-DD
                     `${history.persona?.nombre} ${history.persona?.apellido}`,
@@ -158,9 +158,9 @@ const HistoryPage = () => {
                         </span>
                     </h1>
                     <motion.button
-                        whileHover={{ scale: 1.05 }}
+                        whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.95 }}
-                        className="bg-pastel-red text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors duration-300 flex items-center gap-2"
+                        className="bg-[#5FAAD9] text-white font-semibold px-4 py-2 rounded-lg hover:bg-[#035AA6] transition-colors flex items-center "
                         onClick={() => {
                             setHistorialToEdit(null);
                             setIsFormModalOpen(true);
@@ -196,7 +196,7 @@ const HistoryPage = () => {
                         </div>
                         <button
                             onClick={exportToCSV}
-                            className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                            className="flex items-center gap-2 px-4 py-2 bg-[#5FAAD9] text-white font-semibold rounded-lg hover:bg-[#035AA6] transition-colors"
                         >
                             <FaDownload />
                             <span>Exportar CSV</span>
@@ -204,108 +204,114 @@ const HistoryPage = () => {
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-hidden">
-                    <div className="h-full overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-gray-200">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-6">
-                            {paginatedHistories.map((history) => (
-                                <motion.div
-                                    key={history.cod_historial}
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    className="bg-white rounded-lg shadow-md overflow-hidden"
-                                >
-                                    <div className="p-6">
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div>
-                                                <h3 className="text-lg font-semibold text-gray-800">
-                                                    {history.persona?.nombre} {history.persona?.apellido}
-                                                </h3>
-                                                <p className="text-sm text-gray-500">
-                                                    {typeof history.fecha === 'string' ? new Date(history.fecha).toISOString().split('T')[0] : history.fecha.toISOString().split('T')[0]} {/* Formato YYYY-MM-DD */}
+                {isLoading ? (
+                    <div className="flex justify-center items-center flex-1">
+                        <div className="loader">Cargando...</div>
+                    </div>
+                ) : (
+                    <div className="flex-1 overflow-hidden">
+                        <div className="h-full overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-gray-200">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-6">
+                                {paginatedHistories.map((history) => (
+                                    <motion.div
+                                        key={history.cod_historial}
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        className="bg-white rounded-lg shadow-md overflow-hidden"
+                                    >
+                                        <div className="p-6">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div>
+                                                    <h3 className="text-lg font-semibold text-gray-800">
+                                                        {history.persona?.nombre} {history.persona?.apellido}
+                                                    </h3>
+                                                    <p className="text-sm text-gray-500">
+                                                        {typeof history.fecha === 'string' ? new Date(history.fecha).toISOString().split('T')[0] : history.fecha.toISOString().split('T')[0]} {/* Formato YYYY-MM-DD */}
+                                                    </p>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <motion.button
+                                                        whileHover={{ scale: 1.1 }}
+                                                        whileTap={{ scale: 0.9 }}
+                                                        className="text-blue-500 hover:text-blue-700"
+                                                        onClick={() => navigate(`/${history.cod_historial}`)}
+                                                    >
+                                                        <FaEye size={20} />
+                                                    </motion.button>
+                                                    <motion.button
+                                                        whileHover={{ scale: 1.1 }}
+                                                        whileTap={{ scale: 0.9 }}
+                                                        className="text-yellow-500 hover:text-yellow-700"
+                                                        onClick={() => handleEdit(history)}
+                                                    >
+                                                        <FaEdit size={20} />
+                                                    </motion.button>
+                                                    <motion.button
+                                                        whileHover={{ scale: 1.1 }}
+                                                        whileTap={{ scale: 0.9 }}
+                                                        className="text-red-500 hover:text-red-700"
+                                                        onClick={() => {
+                                                            setSelectedHistory(history.cod_historial);
+                                                            setIsDeleteModalOpen(true);
+                                                        }}
+                                                    >
+                                                        <FaTrashAlt size={20} />
+                                                    </motion.button>
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-2 gap-4 mb-4">
+                                                <div>
+                                                    <p className="text-sm text-gray-500">Presión Arterial</p>
+                                                    <p className="font-semibold">{history.presion_arterial}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm text-gray-500">Tipo de Sangre</p>
+                                                    <p className="font-semibold">{history.tipo_sangre || 'No especificado'}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm text-gray-500">Peso</p>
+                                                    <p className="font-semibold">{history.peso} kg</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm text-gray-500">Estatura</p>
+                                                    <p className="font-semibold">{history.estatura} cm</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="border-t pt-4">
+                                                <p className="text-sm text-gray-500">Atendido por</p>
+                                                <p className="font-semibold">
+                                                    Dr. {history.profesional?.nombre} {history.profesional?.apellido}
                                                 </p>
                                             </div>
-                                            <div className="flex gap-2">
-                                                <motion.button
-                                                    whileHover={{ scale: 1.1 }}
-                                                    whileTap={{ scale: 0.9 }}
-                                                    className="text-blue-500 hover:text-blue-700"
-                                                    onClick={() => navigate(`/${history.cod_historial}`)}
-                                                >
-                                                    <FaEye size={20} />
-                                                </motion.button>
-                                                <motion.button
-                                                    whileHover={{ scale: 1.1 }}
-                                                    whileTap={{ scale: 0.9 }}
-                                                    className="text-yellow-500 hover:text-yellow-700"
-                                                    onClick={() => handleEdit(history)}
-                                                >
-                                                    <FaEdit size={20} />
-                                                </motion.button>
-                                                <motion.button
-                                                    whileHover={{ scale: 1.1 }}
-                                                    whileTap={{ scale: 0.9 }}
-                                                    className="text-red-500 hover:text-red-700"
-                                                    onClick={() => {
-                                                        setSelectedHistory(history.cod_historial);
-                                                        setIsDeleteModalOpen(true);
-                                                    }}
-                                                >
-                                                    <FaTrashAlt size={20} />
-                                                </motion.button>
-                                            </div>
                                         </div>
+                                    </motion.div>
+                                ))}
 
-                                        <div className="grid grid-cols-2 gap-4 mb-4">
-                                            <div>
-                                                <p className="text-sm text-gray-500">Presión Arterial</p>
-                                                <p className="font-semibold">{history.presion_arterial}</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-sm text-gray-500">Tipo de Sangre</p>
-                                                <p className="font-semibold">{history.tipo_sangre || 'No especificado'}</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-sm text-gray-500">Peso</p>
-                                                <p className="font-semibold">{history.peso} kg</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-sm text-gray-500">Estatura</p>
-                                                <p className="font-semibold">{history.estatura} cm</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="border-t pt-4">
-                                            <p className="text-sm text-gray-500">Atendido por</p>
-                                            <p className="font-semibold">
-                                                Dr. {history.profesional?.nombre} {history.profesional?.apellido}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            ))}
-
-                        </div>
-
-                        {totalPages > 1 && (
-                            <div className="mt-6 flex justify-center pb-6">
-                                <nav className="flex gap-2">
-                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                                        <button
-                                            key={page}
-                                            onClick={() => setCurrentPage(page)}
-                                            className={`px-4 py-2 rounded-lg ${currentPage === page
-                                                ? 'bg-blue-500 text-white'
-                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                                }`}
-                                        >
-                                            {page}
-                                        </button>
-                                    ))}
-                                </nav>
                             </div>
-                        )}
+
+                            {totalPages > 1 && (
+                                <div className="mt-6 flex justify-center pb-6">
+                                    <nav className="flex gap-2">
+                                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                                            <button
+                                                key={page}
+                                                onClick={() => setCurrentPage(page)}
+                                                className={`px-4 py-2 rounded-lg ${currentPage === page
+                                                    ? 'bg-blue-500 text-white'
+                                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                                    }`}
+                                            >
+                                                {page}
+                                            </button>
+                                        ))}
+                                    </nav>
+                                </div>
+                            )}
+                        </div>
                     </div>
-                </div>
+                )}
 
                 <ConfirmModal
                     isOpen={isDeleteModalOpen}
