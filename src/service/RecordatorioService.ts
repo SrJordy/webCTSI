@@ -1,14 +1,6 @@
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL;
-const RECORDATORIO_URL = `${API_URL}/ApiRecordatorio`;
-
-const axiosConfig = {
-    headers: {
-        'Content-Type': 'application/json',
-    },
-    withCredentials: true
-};
 
 interface RecordatorioData {
     medicamento_id: number;
@@ -17,10 +9,10 @@ interface RecordatorioData {
     estado: boolean;
 }
 
-export const createRecordatorio = async (recordatorioData: RecordatorioData): Promise<any> => {
+export const createRecordatorio = async (recordatorioData: RecordatorioData): Promise<RecordatorioData> => {
     try {
         console.log('Creando recordatorio:', recordatorioData);
-        const response = await axios.post(RECORDATORIO_URL, recordatorioData, axiosConfig);
+        const response = await axios.post(`${API_URL}/createReminder`, recordatorioData);
         console.log('Recordatorio creado exitosamente:', response.data);
         return response.data;
     } catch (error) {

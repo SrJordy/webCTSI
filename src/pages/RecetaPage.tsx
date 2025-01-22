@@ -68,7 +68,7 @@ export const RecetaPage = () => {
                 } else {
                     toast.error('Error al obtener datos del profesional');
                 }
-            } catch (error) {
+            } catch {
                 toast.error('Error al obtener datos del profesional');
             }
         } else {

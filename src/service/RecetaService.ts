@@ -2,10 +2,6 @@ import axios from "axios";
 import { createRecordatorio } from './RecordatorioService';
 
 const API_URL = import.meta.env.VITE_API_URL;
-const RECETA_URL = `${API_URL}/ApiReceta`;
-const MEDICAMENTO_URL = `${API_URL}/ApiMedicamento`;
-const RECORDATORIO_URL = `${API_URL}/ApiRecordatorio`;
-
 interface Recordatorio {
     medicamento_id: number;
     fechahora: Date;
@@ -34,9 +30,10 @@ const axiosConfig = {
     withCredentials: true
 };
 
-export const getAllRecetas = async (): Promise<any> => {
+export const getAllRecetas = async (): Promise<RecetaData[]> => {
     try {
-        const response = await axios.get(RECETA_URL, axiosConfig);
+        const response = await axios.get(`${API_URL}/recipeall`, axiosConfig);
+        console.log(response)
         return response.data;
     } catch (error) {
         console.error("Error al obtener las recetas", error);
@@ -44,9 +41,9 @@ export const getAllRecetas = async (): Promise<any> => {
     }
 };
 
-export const getReceta = async (id: number): Promise<any> => {
+export const getReceta = async (id: number): Promise<RecetaData[]> => {
     try {
-        const response = await axios.get(`${RECETA_URL}?id=${id}`, axiosConfig);
+        const response = await axios.get(`${API_URL}/recipe?id=${id}`, axiosConfig);
         return response.data;
     } catch (error) {
         console.error("Error al obtener la receta", error);
@@ -54,9 +51,9 @@ export const getReceta = async (id: number): Promise<any> => {
     }
 };
 
-export const getRecetaConMedicamentos = async (id: number): Promise<any> => {
+export const getRecetaConMedicamentos = async (id: number): Promise<RecetaData[]> => {
     try {
-        const response = await axios.get(`${RECETA_URL}?id=${id}`, axiosConfig);
+        const response = await axios.get(`${API_URL}/recipedetails?id=${id}`, axiosConfig);
         return response.data;
     } catch (error) {
         console.error("Error al obtener la receta con medicamentos", error);
@@ -68,9 +65,9 @@ export const createReceta = async (
     recetaData: RecetaData,
     medicamentos: Array<Medicamento>,
     recordatorios: Array<Omit<Recordatorio, 'medicamento_id'>>
-): Promise<any> => {
+): Promise<{ receta: RecetaData; medicamentos: Medicamento[] }> => {
     try {
-        const recetaResponse = await axios.post(RECETA_URL, recetaData, axiosConfig);
+        const recetaResponse = await axios.post(`${API_URL}/createrecipe`, recetaData, axiosConfig);
         const cod_receta = recetaResponse.data.cod_receta;
 
         const medicamentosCreados = await Promise.all(medicamentos.map(async (medicamento) => {
@@ -78,7 +75,7 @@ export const createReceta = async (
                 ...medicamento,
                 receta_id: cod_receta
             };
-            const medicamentoResponse = await axios.post(MEDICAMENTO_URL, medicamentoData, axiosConfig);
+            const medicamentoResponse = await axios.post(`${API_URL}/createMedication`, medicamentoData, axiosConfig);
             return {
                 cod_medicamento: medicamentoResponse.data.cod_medicamento,
                 ...medicamento
@@ -88,13 +85,20 @@ export const createReceta = async (
         await Promise.all(medicamentosCreados.map(async (medicamento, index) => {
             const recordatoriosParaMedicamento = recordatorios[index];
             if (recordatoriosParaMedicamento) {
-                const recordatorioData = {
-                    medicamento_id: medicamento.cod_medicamento,
-                    fechahora: recordatoriosParaMedicamento.fechahora,
-                    persona_id: recetaData.persona_id,
-                    estado: true
-                };
-                await createRecordatorio(recordatorioData);
+                const cantidadRecordatorios = medicamento.cantidadtotal;
+
+                for (let i = 0; i < cantidadRecordatorios; i++) {
+                    const fechaHora = new Date(recordatoriosParaMedicamento.fechahora);
+                    fechaHora.setMinutes(fechaHora.getMinutes() + i * medicamento.frecuenciamin);
+
+                    const recordatorioData = {
+                        medicamento_id: medicamento.cod_medicamento,
+                        fechahora: fechaHora,
+                        persona_id: recetaData.persona_id,
+                        estado: true
+                    };
+                    await createRecordatorio(recordatorioData);
+                }
             }
         }));
 
@@ -108,9 +112,9 @@ export const createReceta = async (
     }
 };
 
-export const updateReceta = async (id: number, data: any): Promise<any> => {
+export const updateReceta = async (id: number, data: Partial<RecetaData>): Promise<RecetaData> => {
     try {
-        const response = await axios.put(`${RECETA_URL}?id=${id}`, data, axiosConfig);
+        const response = await axios.put(`${API_URL}/updaterecipe?id=${id}`, data, axiosConfig);
         return response.data;
     } catch (error) {
         console.error("Error al actualizar la receta", error);
@@ -118,9 +122,9 @@ export const updateReceta = async (id: number, data: any): Promise<any> => {
     }
 };
 
-export const deleteReceta = async (id: number): Promise<any> => {
+export const deleteReceta = async (id: number): Promise<void> => {
     try {
-        const response = await axios.delete(`${RECETA_URL}?id=${id}`, axiosConfig);
+        const response = await axios.delete(`${API_URL}/deleterecipe?id=${id}`, axiosConfig);
         return response.data;
     } catch (error) {
         console.error("Error al eliminar la receta", error);
