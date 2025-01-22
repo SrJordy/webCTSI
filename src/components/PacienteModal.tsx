@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { createPaciente, updatePaciente } from "../service/PacienteService";
 import { getAllUsers } from "../service/UserService";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,11 +17,33 @@ import {
 } from "react-icons/fa";
 import { toast } from "react-hot-toast";
 
+interface Paciente {
+    cod_paciente: number;
+    nombre: string;
+    apellido: string;
+    CID: string | number;
+    telefono: string | number;
+    fecha_nac: string;
+    genero: string;
+    direccion: string;
+    cuidador_id: string | number;
+    cuidador?: {
+        nombre: string;
+        apellido: string;
+    };
+}
+interface Cuidador {
+    cod_usuario: number;
+    nombre: string;
+    apellido: string;
+    CID: string;
+}
+
 interface PacienteFormModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: () => void;
-    pacienteToEdit?: any;
+    pacienteToEdit?: Paciente;
 }
 
 const PacienteFormModal: React.FC<PacienteFormModalProps> = ({
@@ -30,7 +52,7 @@ const PacienteFormModal: React.FC<PacienteFormModalProps> = ({
     onSubmit,
     pacienteToEdit,
 }) => {
-    const initialFormState = {
+    const initialFormState = useMemo(() => ({
         nombre: "",
         apellido: "",
         CID: "",
@@ -40,10 +62,10 @@ const PacienteFormModal: React.FC<PacienteFormModalProps> = ({
         direccion: "",
         cuidador_id: "",
         cuidador_nombre: "",
-    };
+    }), []);
 
     const [formData, setFormData] = useState(initialFormState);
-    const [cuidadores, setCuidadores] = useState<any[]>([]);
+    const [cuidadores, setCuidadores] = useState<Cuidador[]>([]);
     const [isCuidadorModalOpen, setIsCuidadorModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -56,7 +78,7 @@ const PacienteFormModal: React.FC<PacienteFormModalProps> = ({
             if (isOpen) {
                 try {
                     const users = await getAllUsers();
-                    const filteredUsers = users.filter((user: any) => user.rol === "CUIDADOR");
+                    const filteredUsers = users.filter((user: { rol: string }) => user.rol === "CUIDADOR");
                     setCuidadores(filteredUsers);
                 } catch (error) {
                     console.error("Error al cargar cuidadores:", error);
@@ -91,7 +113,7 @@ const PacienteFormModal: React.FC<PacienteFormModalProps> = ({
         } else {
             setFormData(initialFormState);
         }
-    }, [isOpen, pacienteToEdit]);
+    }, [isOpen, pacienteToEdit, initialFormState]);
 
     const validateForm = () => {
         const newErrors: Record<string, string> = {};
@@ -163,7 +185,7 @@ const PacienteFormModal: React.FC<PacienteFormModalProps> = ({
         onClose();
     };
 
-    const handleSelectCuidador = (cuidador: any) => {
+    const handleSelectCuidador = (cuidador: Cuidador) => {
         setFormData({
             ...formData,
             cuidador_id: cuidador.cod_usuario.toString(),
