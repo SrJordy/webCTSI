@@ -7,23 +7,20 @@ import { toast } from 'react-hot-toast';
 import ConfirmModal from '../components/ConfirmModal';
 import TratamientoFormModal from '../components/TratamientoFormModal';
 
-interface Tratamiento {
+export interface Tratamiento {
     cod_tratamiento: number;
     descripcion: string;
     fechainicio: Date | string;
     fechafin: Date | string;
-    profesional_id: number;
-    persona_id: number;
-    estado: boolean;
-    profesional?: {
-        cod_usuario: number;
-        nombre: string;
-        apellido: string;
-    };
-    persona?: {
-        cod_paciente: number;
-        nombre: string;
-        apellido: string;
+    persona_id?: number;
+    estado?: boolean;
+    historial_id: number;
+    historial?: {
+        persona?: {
+            cod_paciente: number;
+            nombre: string;
+            apellido: string;
+        };
     };
 }
 
@@ -42,7 +39,7 @@ const TratamientosListPage = () => {
     const fetchTratamientos = async () => {
         setIsLoading(true);
         try {
-            const data = await TratamientoService.getAllTratamientos();
+            const data = await TratamientoService.getAllTratamientos() as Tratamiento[];
             console.log('Tratamientos obtenidos:', data);
             setTratamientos(data);
             toast.success('Tratamientos cargados exitosamente');
@@ -59,9 +56,9 @@ const TratamientosListPage = () => {
     }, []);
 
     const filteredTratamientos = useMemo(() => {
-        return tratamientos.filter(tratamiento => {
-            return tratamiento.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
-        });
+        return tratamientos.filter(tratamiento =>
+            tratamiento.descripcion.toLowerCase().includes(searchTerm.toLowerCase())
+        );
     }, [tratamientos, searchTerm]);
 
     const paginatedTratamientos = useMemo(() => {
@@ -88,7 +85,7 @@ const TratamientosListPage = () => {
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="min-h-full  -m-8 p-8"
+                className="min-h-full p-8"
             >
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-3xl font-bold text-gray-800">
@@ -100,7 +97,7 @@ const TratamientosListPage = () => {
                     <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="bg-pastel-red text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors duration-300 flex items-center gap-2"
+                        className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-300 flex items-center gap-2"
                         onClick={() => {
                             setTratamientoToEdit(null);
                             setIsFormModalOpen(true);
@@ -112,7 +109,7 @@ const TratamientosListPage = () => {
                 </div>
 
                 <div className="bg-white p-4 rounded-lg shadow-md mb-6">
-                    <div className="flex items-center mb-4">
+                    <div className="flex items-center">
                         <div className="relative flex-1">
                             <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                             <input
@@ -126,82 +123,82 @@ const TratamientosListPage = () => {
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-hidden">
-                    <div className="h-full overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-gray-200">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-6">
-                            {paginatedTratamientos.map((tratamiento) => (
-                                <motion.div
-                                    key={tratamiento.cod_tratamiento}
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    className="bg-white rounded-lg shadow-md overflow-hidden transition-transform transform hover:scale-105"
-                                >
-                                    <div className="p-6">
-                                        <h3 className="text-lg font-semibold text-gray-800">
-                                            {tratamiento.descripcion}
-                                        </h3>
-                                        <p className="text-sm text-gray-500">
-                                            <strong>Paciente:</strong> {tratamiento.historial.persona?.nombre} {tratamiento.historial.persona?.apellido}
+                {isLoading ? (
+                    <div className="flex justify-center items-center h-64">
+                        <div className="loader">Loading...</div>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {paginatedTratamientos.map((tratamiento) => (
+                            <motion.div
+                                key={tratamiento.cod_tratamiento}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="bg-white rounded-lg shadow-lg overflow-hidden transition-transform transform hover:scale-105"
+                            >
+                                <div className="p-6">
+                                    <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                                        {tratamiento.descripcion}
+                                    </h3>
+                                    <div className="space-y-2">
+                                        <p className="text-sm text-gray-600">
+                                            <strong>Paciente:</strong> {tratamiento.historial?.persona?.nombre} {tratamiento.historial?.persona?.apellido}
                                         </p>
-                                        <p className="text-sm text-gray-500">
-                                            <strong>Profesional:</strong> {tratamiento.historial.profesional?.nombre} {tratamiento.historial.profesional?.apellido}
-                                        </p>
-                                        <p className="text-sm text-gray-500">
+                                        <p className="text-sm text-gray-600">
                                             <strong>Fecha Inicio:</strong> {new Date(tratamiento.fechainicio).toLocaleDateString()}
                                         </p>
-                                        <p className="text-sm text-gray-500">
+                                        <p className="text-sm text-gray-600">
                                             <strong>Fecha Fin:</strong> {new Date(tratamiento.fechafin).toLocaleDateString()}
                                         </p>
-                                        <div className="flex justify-end mt-4">
-                                            <motion.button
-                                                whileHover={{ scale: 1.1 }}
-                                                whileTap={{ scale: 0.9 }}
-                                                className="text-yellow-500 hover:text-yellow-700 mr-2"
-                                                onClick={() => {
-                                                    console.log('Datos del tratamiento a editar:', tratamiento);
-                                                    setTratamientoToEdit(tratamiento);
-                                                    setIsFormModalOpen(true);
-                                                }}
-                                            >
-                                                <FaEdit size={20} />
-                                            </motion.button>
-                                            <motion.button
-                                                whileHover={{ scale: 1.1 }}
-                                                whileTap={{ scale: 0.9 }}
-                                                className="text-red-500 hover:text-red-700"
-                                                onClick={() => {
-                                                    setSelectedTratamiento(tratamiento.cod_tratamiento);
-                                                    setIsDeleteModalOpen(true);
-                                                }}
-                                            >
-                                                <FaTrashAlt size={20} />
-                                            </motion.button>
-                                        </div>
                                     </div>
-                                </motion.div>
-                            ))}
-                        </div>
-
-                        {totalPages > 1 && (
-                            <div className="mt-6 flex justify-center pb-6">
-                                <nav className="flex gap-2">
-                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                                        <button
-                                            key={page}
-                                            onClick={() => setCurrentPage(page)}
-                                            className={`px-4 py-2 rounded-lg ${currentPage === page
-                                                ? 'bg-blue-500 text-white'
-                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                                }`}
+                                    <div className="flex justify-end mt-4 space-x-2">
+                                        <motion.button
+                                            whileHover={{ scale: 1.1 }}
+                                            whileTap={{ scale: 0.9 }}
+                                            className="text-blue-500 hover:text-blue-700"
+                                            onClick={() => {
+                                                setTratamientoToEdit(tratamiento);
+                                                setIsFormModalOpen(true);
+                                            }}
                                         >
-                                            {page}
-                                        </button>
-                                    ))}
-                                </nav>
-                            </div>
-                        )}
+                                            <FaEdit size={20} />
+                                        </motion.button>
+                                        <motion.button
+                                            whileHover={{ scale: 1.1 }}
+                                            whileTap={{ scale: 0.9 }}
+                                            className="text-red-500 hover:text-red-700"
+                                            onClick={() => {
+                                                setSelectedTratamiento(tratamiento.cod_tratamiento);
+                                                setIsDeleteModalOpen(true);
+                                            }}
+                                        >
+                                            <FaTrashAlt size={20} />
+                                        </motion.button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))}
                     </div>
-                </div>
+                )}
+
+                {totalPages > 1 && (
+                    <div className="mt-6 flex justify-center">
+                        <nav className="flex gap-2">
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                                <button
+                                    key={page}
+                                    onClick={() => setCurrentPage(page)}
+                                    className={`px-4 py-2 rounded-lg ${currentPage === page
+                                        ? 'bg-blue-500 text-white'
+                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        }`}
+                                >
+                                    {page}
+                                </button>
+                            ))}
+                        </nav>
+                    </div>
+                )}
 
                 <ConfirmModal
                     isOpen={isDeleteModalOpen}
@@ -216,7 +213,7 @@ const TratamientosListPage = () => {
                         fetchTratamientos();
                         setIsFormModalOpen(false);
                     }}
-                    tratamientoToEdit={tratamientoToEdit}
+                    tratamientoToEdit={tratamientoToEdit || undefined}
                 />
             </motion.div>
         </MainLayout>

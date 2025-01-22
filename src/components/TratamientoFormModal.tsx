@@ -6,13 +6,22 @@ import SelectHistorialModal from './SelectHistorialModal';
 import SuccessModal from './SuccessModal';
 
 interface Tratamiento {
-    cod_tratamiento?: number;
+    cod_tratamiento: number;
     descripcion: string;
     fechainicio: Date | string;
     fechafin: Date | string;
-    historial_id: number;
-    historial: {
-        persona: {
+    profesional_id?: number;
+    persona_id?: number;
+    estado?: boolean;
+    historial_id: number; 
+    historial?: { 
+        persona?: {
+            cod_paciente: number;
+            nombre: string;
+            apellido: string;
+        };
+        profesional?: {
+            cod_usuario: number;
             nombre: string;
             apellido: string;
         };
@@ -23,7 +32,7 @@ interface TratamientoFormModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: () => void;
-    tratamientoToEdit?: Tratamiento | null;
+    tratamientoToEdit?: Tratamiento | null | undefined;
 }
 
 const TratamientoFormModal: React.FC<TratamientoFormModalProps> = ({
@@ -68,7 +77,7 @@ const TratamientoFormModal: React.FC<TratamientoFormModalProps> = ({
                     fechainicio: new Date(tratamientoToEdit.fechainicio).toISOString().split('T')[0],
                     fechafin: new Date(tratamientoToEdit.fechafin).toISOString().split('T')[0],
                     historial_id: tratamientoToEdit.historial_id,
-                    pacienteNombre: `${tratamientoToEdit.historial.persona.nombre} ${tratamientoToEdit.historial.persona.apellido}`
+                    pacienteNombre: `${tratamientoToEdit.historial?.persona?.nombre} ${tratamientoToEdit.historial?.persona?.apellido}`
                 });
             } else {
                 resetForm();
