@@ -3,41 +3,6 @@ import { toast } from "react-hot-toast";
 
 const API_URL = import.meta.env.VITE_API_URL; 
 
-interface Persona {
-    cod_paciente: number;
-    nombre: string;
-    apellido: string;
-    CID: string;
-    telefono: string;
-    fecha_nac: Date | string;
-    genero: string;
-    direccion: string;
-    estado: boolean;
-}
-
-interface Profesional {
-    cod_usuario: number;
-    nombre: string;
-    apellido: string;
-    telefono: string;
-    email: string;
-    rol: string;
-    estado: boolean;
-}
-
-interface Historial {
-    cod_historial: number;
-    descripcion: string;
-    tipo_sangre: string;
-    presion_arterial: string;
-    peso: number;
-    estatura: number;
-    temperatura: number;
-    nivel_glucosa: number;
-    fecha: Date | string;
-    persona: Persona;
-    profesional: Profesional;
-}
 
 interface Tratamiento {
     cod_tratamiento?: number;
