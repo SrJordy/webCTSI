@@ -35,7 +35,7 @@ const DiagnosticoModal: React.FC<DiagnosticoModalProps> = ({
         historial_id: 0
     });
 
-    const [selectedHistorial, setSelectedHistorial] = useState<any>(null);
+    const [selectedHistorial, setSelectedHistorial] = useState<Historial | null>(null);
     const [isSelectHistorialOpen, setIsSelectHistorialOpen] = useState(false);
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -49,7 +49,10 @@ const DiagnosticoModal: React.FC<DiagnosticoModalProps> = ({
                 historial_id: diagnostico.historial_id
             });
             if (diagnostico.historial) {
-                setSelectedHistorial(diagnostico.historial);
+                setSelectedHistorial({
+                    cod_historial: diagnostico.historial_id,
+                    persona: diagnostico.historial?.persona || { nombre: '', apellido: '' }
+                });
             }
         } else {
             resetForm();
@@ -106,7 +109,15 @@ const DiagnosticoModal: React.FC<DiagnosticoModalProps> = ({
         }
     };
 
-    const handleSelectHistorial = (historial: any) => {
+    interface Historial {
+        cod_historial: number;
+        persona?: {
+            nombre: string;
+            apellido: string;
+        };
+    }
+
+    const handleSelectHistorial = (historial: Historial) => {
         setSelectedHistorial(historial);
         setFormData(prev => ({
             ...prev,
@@ -154,7 +165,7 @@ const DiagnosticoModal: React.FC<DiagnosticoModalProps> = ({
                                         {selectedHistorial ? (
                                             <div className="flex justify-between items-center">
                                                 <span className="text-gray-800">
-                                                    {selectedHistorial.persona.nombre} {selectedHistorial.persona.apellido}
+                                                    {selectedHistorial.persona?.nombre} {selectedHistorial.persona?.apellido}
                                                 </span>
                                                 <button
                                                     type="button"

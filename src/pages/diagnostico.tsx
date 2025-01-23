@@ -30,7 +30,10 @@ const DiagnosticosPage = () => {
     const formatDate = (dateString: string) => {
         if (!dateString) return "-";
         const date = new Date(dateString);
-        return date.toLocaleDateString("es-ES", {
+        const userTimezoneOffset = date.getTimezoneOffset() * 60000;
+        const adjustedDate = new Date(date.getTime() + userTimezoneOffset);
+        
+        return adjustedDate.toLocaleDateString("es-ES", {
             day: "2-digit",
             month: "2-digit",
             year: "numeric",

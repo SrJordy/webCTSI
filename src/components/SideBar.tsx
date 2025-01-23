@@ -24,7 +24,12 @@ interface MenuItem {
 
 const Sidebar = () => {
     const [isOpen, setIsOpen] = useState(true);
-    const [user, setUser] = useState<any>(null);
+    interface User {
+        nombre: string;
+        rol: string;
+    }
+
+    const [user, setUser] = useState<User | null>(null);
     const navigate = useNavigate();
     const location = useLocation();
 
