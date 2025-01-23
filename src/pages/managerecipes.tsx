@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ConfirmModal from '../components/ConfirmModal';
 import { useNavigate } from 'react-router-dom';
 import RecetaDetailModal from '../components/ModalReceta';
+import EditRecetaModal from '../components/EditRecetaModal';
 
 interface Medicamento {
     cod_medicamento: number;
@@ -45,6 +46,9 @@ export const RecetasListPage = () => {
     const [selectedReceta, setSelectedReceta] = useState<Receta | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(9);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [selectedRecetaId, setSelectedRecetaId] = useState<number | null>(null);
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -63,6 +67,11 @@ export const RecetasListPage = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleEditReceta = (recetaId: number) => {
+        setSelectedRecetaId(recetaId); 
+        setIsEditModalOpen(true); 
     };
 
     const handleDelete = async (recetaId: number) => {
@@ -211,7 +220,7 @@ export const RecetasListPage = () => {
                                                         className="text-yellow-500 hover:text-yellow-700 mr-2"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            navigate(`/Receta`);
+                                                            handleEditReceta(receta.cod_receta); 
                                                         }}
                                                     >
                                                         <FaEdit size={20} />
@@ -277,6 +286,14 @@ export const RecetasListPage = () => {
                 title="Confirmar Eliminación"
                 message="¿Está seguro que desea eliminar esta receta? Esta acción no se puede deshacer."
             />
+            <EditRecetaModal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                recetaId={selectedRecetaId || 0}
+                personaId={selectedReceta?.persona.cod_persona || 0} 
+                profesionalId={selectedReceta?.profesional.cod_profesional || 0} 
+            />
+            
         </MainLayout>
     );
 };

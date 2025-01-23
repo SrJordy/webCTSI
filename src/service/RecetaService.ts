@@ -1,5 +1,6 @@
 import axios from "axios";
-import { createRecordatorio } from './RecordatorioService';
+import { createRecordatorio, deleteRecordatorio } from './RecordatorioService';
+
 
 const API_URL = import.meta.env.VITE_API_URL;
 interface Recordatorio {
@@ -44,6 +45,7 @@ export const getAllRecetas = async (): Promise<RecetaData[]> => {
 export const getReceta = async (id: number): Promise<RecetaData[]> => {
     try {
         const response = await axios.get(`${API_URL}/recipe?id=${id}`, axiosConfig);
+        console.log("datos de receta:", response.data);
         return response.data;
     } catch (error) {
         console.error("Error al obtener la receta", error);
@@ -112,22 +114,102 @@ export const createReceta = async (
     }
 };
 
-export const updateReceta = async (id: number, data: Partial<RecetaData>): Promise<RecetaData> => {
+export const updateReceta = async (
+    id: number,
+    recetaData: RecetaData,
+    medicamentos: Array<Medicamento & { recordatorioModificado?: boolean }>,
+    recordatorios: Array<Omit<Recordatorio, 'medicamento_id'>>
+): Promise<{ receta: RecetaData; medicamentos: Medicamento[] }> => {
     try {
-        const response = await axios.put(`${API_URL}/updaterecipe?id=${id}`, data, axiosConfig);
-        return response.data;
+        // 1. Actualizar la receta
+        const recetaResponse = await axios.put(`${API_URL}/updaterecipe?id=${id}`, recetaData, axiosConfig);
+        const cod_receta = recetaResponse.data.cod_receta;
+
+        // 2. Procesar los medicamentos
+        const medicamentosActualizados = await Promise.all(medicamentos.map(async (medicamento) => {
+            const medicamentoData = {
+                ...medicamento,
+                receta_id: cod_receta
+            };
+
+            let medicamentoActualizado;
+
+            if (medicamento.cod_medicamento) {
+                // Actualizar medicamento existente
+                medicamentoActualizado = await axios.put(
+                    `${API_URL}/updateMedication?id=${medicamento.cod_medicamento}`,
+                    medicamentoData,
+                    axiosConfig
+                );
+            } else {
+                // Crear nuevo medicamento
+                medicamentoActualizado = await axios.post(
+                    `${API_URL}/createMedication`,
+                    medicamentoData,
+                    axiosConfig
+                );
+            }
+
+            return {
+                cod_medicamento: medicamentoActualizado.data.cod_medicamento,
+                ...medicamento
+            };
+        }));
+
+        // 3. Procesar los recordatorios
+        await Promise.all(medicamentosActualizados.map(async (medicamento, index) => {
+            const recordatorioActual = recordatorios[index];
+
+            // Solo procesar si el recordatorio fue modificado
+            if (medicamento.recordatorioModificado && medicamento.cod_medicamento) {
+                // Eliminar recordatorios existentes
+                await deleteRecordatorio(medicamento.cod_medicamento);
+
+                // Crear nuevos recordatorios
+                const cantidadRecordatorios = medicamento.cantidadtotal;
+
+                for (let i = 0; i < cantidadRecordatorios; i++) {
+                    const fechaHora = new Date(recordatorioActual.fechahora);
+                    fechaHora.setMinutes(fechaHora.getMinutes() + i * medicamento.frecuenciamin);
+
+                    const recordatorioData = {
+                        medicamento_id: medicamento.cod_medicamento,
+                        fechahora: fechaHora,
+                        persona_id: recetaData.persona_id,
+                        estado: true
+                    };
+                    await createRecordatorio(recordatorioData);
+                }
+            }
+        }));
+
+        return {
+            receta: recetaResponse.data,
+            medicamentos: medicamentosActualizados
+        };
     } catch (error) {
-        console.error("Error al actualizar la receta", error);
-        throw new Error("Error al actualizar la receta");
+        console.error("Error al actualizar la receta:", error);
+        throw error;
     }
 };
 
 export const deleteReceta = async (id: number): Promise<void> => {
     try {
-        const response = await axios.delete(`${API_URL}/deleterecipe?id=${id}`, axiosConfig);
-        return response.data;
+        const recetaResponse = await axios.get(`${API_URL}/recipedetails?id=${id}`, axiosConfig);
+        const medicamentos = recetaResponse.data.medicamento || [];
+        await Promise.all(medicamentos.map(async (medicamento: Medicamento) => {
+            if (medicamento.cod_medicamento) {
+                await deleteRecordatorio(medicamento.cod_medicamento);
+                await axios.delete(
+                    `${API_URL}/deleteMedication?id=${medicamento.cod_medicamento}`,
+                    axiosConfig
+                );
+            }
+        }));
+        await axios.delete(`${API_URL}/deleterecipe?id=${id}`, axiosConfig);
+
     } catch (error) {
-        console.error("Error al eliminar la receta", error);
-        throw new Error("Error al eliminar la receta");
+        console.error("Error al eliminar la receta y sus dependencias", error);
+        throw new Error("Error al eliminar la receta y sus dependencias");
     }
 };

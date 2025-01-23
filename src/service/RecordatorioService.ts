@@ -24,3 +24,18 @@ export const createRecordatorio = async (recordatorioData: RecordatorioData): Pr
         throw new Error("Error al crear el recordatorio");
     }
 };
+
+export const deleteRecordatorio = async (id: number): Promise<void> => {
+    try {
+        console.log('Eliminando recordatorio:', id);
+        const response = await axios.delete(`${API_URL}/deleteFisico?id=${id}`);
+        console.log('Recordatorio eliminado exitosamente:', response.data);
+    } catch (error) {
+        console.error("Error al eliminar el recordatorio:", error);
+        if (axios.isAxiosError(error)) {
+            console.error("Respuesta del servidor:", error.response?.data);
+            console.error("Estado de la respuesta:", error.response?.status);
+        }
+        throw new Error("Error al eliminar el recordatorio");
+    }
+}
