@@ -9,6 +9,7 @@ import RecetaPage from './pages/RecetaPage';
 import RecetasListPage from './pages/managerecipes';
 import TratamientosListPage from './pages/Tratamientos';
 import ExamenesPage from './pages/examenPage';
+import DiagnosticosPage from './pages/diagnostico';
 
 const App = () => {
   return (
@@ -25,6 +26,7 @@ const App = () => {
         <Route path="/managerecipes" element={<RecetasListPage />} />
         <Route path="/Tratamientos" element={<TratamientosListPage />} />
         <Route path="/Examenes" element={<ExamenesPage />} />
+        <Route path="/Diagnosticos" element={<DiagnosticosPage />} />
       </Routes>
     </BrowserRouter>
   );
