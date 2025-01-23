@@ -211,7 +211,7 @@ export const RecetasListPage = () => {
                                                         className="text-yellow-500 hover:text-yellow-700 mr-2"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            navigate(`/receta/${receta.cod_receta}`);
+                                                            navigate(`/Receta`);
                                                         }}
                                                     >
                                                         <FaEdit size={20} />
