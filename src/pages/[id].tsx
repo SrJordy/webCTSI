@@ -1,10 +1,10 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import MainLayout from '../layouts/MainLayout';
 import { HistoryService } from '../service/HistoryService';
 import { toast } from 'react-hot-toast';
-import { FaDownload, FaArrowLeft, FaPrint, FaUser, FaHeartbeat, FaStethoscope, FaPills, FaFlask, FaIdCard, FaPhone, FaEnvelope, FaMapMarkerAlt, FaBirthdayCake, FaVenusMars, FaUserMd } from 'react-icons/fa';
+import {  FaArrowLeft, FaUser, FaHeartbeat, FaStethoscope, FaPills, FaFlask, FaIdCard, FaPhone, FaMapMarkerAlt, FaBirthdayCake, FaVenusMars} from 'react-icons/fa';
 
 
 export interface HistorialMedico {
@@ -120,7 +120,7 @@ const HistorialView = () => {
             <motion.div 
                 initial={{ opacity: 0, y: 20 }} 
                 animate={{ opacity: 1, y: 0 }} 
-                className="h-full flex flex-col bg-gradient-to-br from-blue-50 to-indigo-50 p-6 overflow-hidden"
+                className="h-full flex flex-col bg-[#C4E5F2] p-6 overflow-hidden"
             >
                 <div className="flex justify-between items-center mb-6">
                     <button 

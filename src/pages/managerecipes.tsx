@@ -71,7 +71,11 @@ export const RecetasListPage = () => {
             toast.success('Receta eliminada exitosamente');
             fetchRecetas();
         } catch (error) {
-            toast.error('Error al eliminar la receta');
+            console.error('Error al eliminar las recetas:', error);
+            toast.error('Error al eliminar las recetas');
+            setRecetas([]);
+        } finally {
+            setLoading(false);
         }
         setShowDeleteModal(false);
         setSelectedReceta(null);
@@ -120,7 +124,7 @@ export const RecetasListPage = () => {
                         <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className="bg-pastel-red text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors duration-300 flex items-center gap-2"
+                            className="bg-[#5FAAD9] text-white px-6 py-2 rounded-lg hover:bg-[#035AA6] transition-colors duration-300 flex items-center gap-2"
                             onClick={() => navigate('/Receta')}
                         >
                             <FaPlus className="mr-2" />
@@ -265,7 +269,11 @@ export const RecetasListPage = () => {
             <ConfirmModal
                 isOpen={showDeleteModal}
                 onClose={() => setShowDeleteModal(false)}
-                onConfirm={() => handleDelete(selectedReceta?.cod_receta!)}
+                onConfirm={() => {
+                    if (selectedReceta) {
+                        handleDelete(selectedReceta.cod_receta);
+                    }
+                }}
                 title="Confirmar Eliminación"
                 message="¿Está seguro que desea eliminar esta receta? Esta acción no se puede deshacer."
             />

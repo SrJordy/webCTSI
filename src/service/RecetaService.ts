@@ -33,7 +33,7 @@ const axiosConfig = {
 export const getAllRecetas = async (): Promise<RecetaData[]> => {
     try {
         const response = await axios.get(`${API_URL}/recipeall`, axiosConfig);
-        console.log(response)
+        console.log('Recetas:', response.data);
         return response.data;
     } catch (error) {
         console.error("Error al obtener las recetas", error);

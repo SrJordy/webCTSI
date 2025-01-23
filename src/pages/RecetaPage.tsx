@@ -6,6 +6,9 @@ import * as RecetaService from '../service/RecetaService';
 import SelectPatientModal from '../components/SelectPatientModal';
 import axios from 'axios';
 import { motion } from 'framer-motion';
+import SuccessModal from '../components/SuccessModal';
+import { useNavigate } from 'react-router-dom';
+
 
 interface Paciente {
     cod_paciente: number;
@@ -54,6 +57,8 @@ export const RecetaPage = () => {
     const [selectedPatient, setSelectedPatient] = useState<Paciente | null>(null);
     const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false); 
+    const [successMessage, setSuccessMessage] = useState(''); 
 
     useEffect(() => {
         const userString = localStorage.getItem('user');
@@ -154,10 +159,8 @@ export const RecetaPage = () => {
             medicamentos.forEach((med, index) => {
                 const { frecuenciamin, cantidadtotal } = med;
 
-                // Obtener la fecha y hora inicial del recordatorio
                 const fechaInicial = new Date(formData.medicamentos[index].recordatorio.fechahora);
 
-                // Generar recordatorios basados en la fecha inicial y la frecuencia
                 for (let i = 0; i < cantidadtotal; i++) {
                     const nextReminder = new Date(fechaInicial.getTime() + i * frecuenciamin * 60 * 1000);
                     recordatorios.push({
@@ -167,26 +170,6 @@ export const RecetaPage = () => {
                     });
                 }
             });
-
-            console.log('=== DATOS A ENVIAR ===');
-            console.log('Receta:', recetaData);
-            console.log('Medicamentos:', medicamentos.map((med, index) => ({
-                ...med,
-                frecuencia_original: formData.medicamentos[index].frecuenciamin,
-                frecuencia_en_minutos: med.frecuenciamin
-            })));
-            console.log('Recordatorios generados:', recordatorios.map(r => ({
-                ...r,
-                fechahora: r.fechahora.toLocaleString('es-CO', {
-                    timeZone: 'America/Bogota',
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                })
-            })));
 
             const isValid = medicamentos.every(med =>
                 med.nombre &&
@@ -200,9 +183,11 @@ export const RecetaPage = () => {
                 return;
             }
 
-            const result = await RecetaService.createReceta(recetaData, medicamentos, recordatorios);
+            await RecetaService.createReceta(recetaData, medicamentos, recordatorios);
             toast.success('Receta registrada exitosamente');
 
+            setSuccessMessage('Receta registrada exitosamente');
+            setShowSuccessModal(true);
             setFormData({
                 persona_id: '',
                 profesional_id: formData.profesional_id,
@@ -229,13 +214,20 @@ export const RecetaPage = () => {
         }
     };
 
+    const navigate = useNavigate();
+
+    const handleSuccessModalClose = () => {
+        navigate('/managerecipes');
+        setShowSuccessModal(false);
+    };
+
     return (
         <MainLayout>
             <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
-                className="min-h-full bg-gradient-to-br from-red-50 to-pink-50 -m-8 p-8">
+                className="min-h-full bg-[#C4E5F2] -m-8 p-8">
                 <motion.div 
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
@@ -253,7 +245,7 @@ export const RecetaPage = () => {
                                     <button
                                         type="button"
                                         onClick={() => setIsPatientModalOpen(true)}
-                                        className="px-4 py-2 bg-red-400 text-white rounded-lg hover:bg-red-500 transition-colors flex items-center"
+                                        className="px-4 py-2 bg-[#5FAAD9] text-white rounded-lg hover:bg-[#035AA6] transition-colors flex items-center"
                                     >
                                         Seleccionar Paciente
                                     </button>
@@ -302,7 +294,7 @@ export const RecetaPage = () => {
                                     <button
                                         type="button"
                                         onClick={handleAddMedicamento}
-                                        className="px-4 py-2 bg-red-400 text-white rounded-lg hover:bg-red-500 transition-colors flex items-center"
+                                        className="px-4 py-2 bg-[#5FAAD9] text-white rounded-lg hover:bg-[#035AA6] transition-colors flex items-center"
                                     >
                                         <FaPlus className="mr-2" />
                                         Agregar Medicamento
@@ -332,7 +324,7 @@ export const RecetaPage = () => {
                                                     type="text"
                                                     value={medicamento.nombre}
                                                     onChange={(e) => handleMedicamentoChange(index, 'nombre', e.target.value)}
-                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:border-transparent"
+                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#035AA6] focus:border-transparent"
                                                     required
                                                 />
                                             </div>
@@ -344,7 +336,7 @@ export const RecetaPage = () => {
                                                     type="text"
                                                     value={medicamento.descripcion}
                                                     onChange={(e) => handleMedicamentoChange(index, 'descripcion', e.target.value)}
-                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:border-transparent"
+                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#035AA6] focus:border-transparent"
                                                     required
                                                 />
                                             </div>
@@ -356,7 +348,7 @@ export const RecetaPage = () => {
                                                     type="time"
                                                     value={medicamento.frecuenciamin}
                                                     onChange={(e) => handleMedicamentoChange(index, 'frecuenciamin', e.target.value)}
-                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:border-transparent"
+                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#035AA6] focus:border-transparent"
                                                     required
                                                 />
                                             </div>
@@ -368,7 +360,7 @@ export const RecetaPage = () => {
                                                     type="number"
                                                     value={medicamento.cantidadtotal}
                                                     onChange={(e) => handleMedicamentoChange(index, 'cantidadtotal', e.target.value)}
-                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:border-transparent"
+                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#035AA6] focus:border-transparent"
                                                     required
                                                 />
                                             </div>
@@ -391,7 +383,7 @@ export const RecetaPage = () => {
                                                         type="datetime-local"
                                                         value={medicamento.recordatorio.fechahora}
                                                         onChange={(e) => handleRecordatorioChange(index, e.target.value)}
-                                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-400 focus:border-transparent"
+                                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#035AA6] focus:border-transparent"
                                                         required
                                                     />
                                                 </div>
@@ -404,7 +396,7 @@ export const RecetaPage = () => {
                                 <button
                                     type="submit"
                                     disabled={loading || !selectedPatient}
-                                    className={`px-6 py-2 bg-red-400 text-white rounded-lg hover:bg-red-500 transition-colors flex items-center ${(loading || !selectedPatient) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    className={`px-6 py-2 bg-[#5FAAD9] text-white rounded-lg hover:bg-[#035AA6] transition-colors flex items-center ${(loading || !selectedPatient) ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
                                     {loading ? 'Registrando...' : 'Registrar Receta'}
                                 </button>
@@ -417,6 +409,11 @@ export const RecetaPage = () => {
                 isOpen={isPatientModalOpen}
                 onClose={() => setIsPatientModalOpen(false)}
                 onSelect={handlePatientSelect}
+            />
+            <SuccessModal
+                isOpen={showSuccessModal}
+                onClose={handleSuccessModalClose}
+                message={successMessage}
             />
         </MainLayout>
     );
