@@ -121,11 +121,8 @@ export const updateReceta = async (
     recordatorios: Array<Omit<Recordatorio, 'medicamento_id'>>
 ): Promise<{ receta: RecetaData; medicamentos: Medicamento[] }> => {
     try {
-        // 1. Actualizar la receta
         const recetaResponse = await axios.put(`${API_URL}/updaterecipe?id=${id}`, recetaData, axiosConfig);
         const cod_receta = recetaResponse.data.cod_receta;
-
-        // 2. Procesar los medicamentos
         const medicamentosActualizados = await Promise.all(medicamentos.map(async (medicamento) => {
             const medicamentoData = {
                 ...medicamento,
@@ -135,14 +132,12 @@ export const updateReceta = async (
             let medicamentoActualizado;
 
             if (medicamento.cod_medicamento) {
-                // Actualizar medicamento existente
                 medicamentoActualizado = await axios.put(
                     `${API_URL}/updateMedication?id=${medicamento.cod_medicamento}`,
                     medicamentoData,
                     axiosConfig
                 );
             } else {
-                // Crear nuevo medicamento
                 medicamentoActualizado = await axios.post(
                     `${API_URL}/createMedication`,
                     medicamentoData,
