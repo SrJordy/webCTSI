@@ -8,6 +8,7 @@ import HistorialView from './pages/[id]';
 import RecetaPage from './pages/RecetaPage';
 import RecetasListPage from './pages/managerecipes';
 import TratamientosListPage from './pages/Tratamientos';
+import ExamenesPage from './pages/examenPage';
 
 const App = () => {
   return (
@@ -23,6 +24,7 @@ const App = () => {
         <Route path="/Receta" element={<RecetaPage />} />
         <Route path="/managerecipes" element={<RecetasListPage />} />
         <Route path="/Tratamientos" element={<TratamientosListPage />} />
+        <Route path="/Examenes" element={<ExamenesPage />} />
       </Routes>
     </BrowserRouter>
   );

@@ -10,7 +10,8 @@ import {
     MdChevronRight,
     MdHistoryEdu,
     MdReceipt,
-    MdAssignmentAdd
+    MdAssignmentAdd,
+    MdNote
 } from 'react-icons/md';
 
 interface MenuItem {
@@ -40,6 +41,7 @@ const Sidebar = () => {
         { title: 'Historial Medico', path: '/History', icon: MdHistoryEdu },
         { title: 'Receta', path: '/managerecipes', icon: MdReceipt },
         { title: 'Tratamientos', path: '/Tratamientos', icon: MdAssignmentAdd},
+        { title: 'Examenes', path: '/Examenes', icon: MdNote},
     ];
 
     const handleLogout = () => {
