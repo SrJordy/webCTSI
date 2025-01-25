@@ -1,7 +1,6 @@
-// components/SelectPatientModal.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaSearch } from 'react-icons/fa';
+import { FaSearch, FaTimes, FaUser } from 'react-icons/fa';
 import * as PacienteService from '../service/PacienteService';
 import { toast } from 'react-hot-toast';
 
@@ -46,122 +45,132 @@ const SelectPatientModal: React.FC<SelectPatientModalProps> = ({
         }
     };
 
-    const handleSearch = async () => {
-        if (searchTerm.trim()) {
-            try {
-                setIsLoading(true);
-                const criteria = {
-                    search: searchTerm
-                };
-                const data = await PacienteService.getPaciente(criteria);
-                setPacientes(Array.isArray(data) ? data : [data]);
-            } catch (error) {
-                console.error('Error en la búsqueda:', error);
-                toast.error('Error al buscar pacientes');
-            } finally {
-                setIsLoading(false);
+    const handleSearch = useCallback(async () => {
+        try {
+            setIsLoading(true);
+            const data = await PacienteService.getAllPacientes();
+            
+            if (searchTerm.trim()) {
+                const filteredPacientes = data.filter((paciente: Paciente) => 
+                    paciente.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    paciente.apellido.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    paciente.CID.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+                setPacientes(filteredPacientes);
+            } else {
+                setPacientes(data);
             }
-        } else {
-            fetchPacientes();
+        } catch (error) {
+            console.error('Error en la búsqueda:', error);
+            toast.error('Error al buscar pacientes');
+        } finally {
+            setIsLoading(false);
         }
-    };
-
-    // Debounce para la búsqueda
+    }, [searchTerm]); 
+    
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             handleSearch();
-        }, 500);
-
+        }, 300);
+    
         return () => clearTimeout(timeoutId);
-    }, [searchTerm]);
+    }, [handleSearch]); 
 
     return (
         <AnimatePresence>
             {isOpen && (
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-50"
-                >
+                <div className="fixed inset-0 z-[60] flex items-center justify-center">
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black bg-opacity-50"
+                        onClick={onClose}
+                    />
                     <motion.div
                         initial={{ scale: 0.95, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0.95, opacity: 0 }}
-                        className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
+                        className="bg-white rounded-xl shadow-2xl w-full max-w-3xl relative z-50 overflow-hidden"
+                        onClick={(e) => e.stopPropagation()}
                     >
-                        <h2 className="text-2xl font-bold mb-4">Seleccionar Paciente</h2>
+                        {/* Header */}
+                        <div className="bg-[#5FAAD9] px-6 py-4 flex justify-between items-center">
+                            <h2 className="text-xl font-bold text-white">Seleccionar Paciente</h2>
+                            <button
+                                onClick={onClose}
+                                className="text-white hover:text-gray-200 transition-colors"
+                            >
+                                <FaTimes className="w-5 h-5" />
+                            </button>
+                        </div>
 
-                        <div className="mb-4">
-                            <div className="relative">
-                                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        {/* Search Bar */}
+                        <div className="p-6">
+                            <div className="relative mb-6">
                                 <input
                                     type="text"
                                     placeholder="Buscar por nombre, apellido o CID..."
-                                    className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary"
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5FAAD9] focus:border-transparent"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
+                                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                             </div>
-                        </div>
 
-                        <div className="flex-1 overflow-y-auto">
-                            <table className="w-full">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-4 py-2 text-left">CID</th>
-                                        <th className="px-4 py-2 text-left">Nombre</th>
-                                        <th className="px-4 py-2 text-left">Apellido</th>
-                                        <th className="px-4 py-2"></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {isLoading ? (
+                            {/* Table */}
+                            <div className="max-h-[calc(100vh-300px)] overflow-y-auto">
+                                <table className="w-full">
+                                    <thead className="bg-gray-50 sticky top-0">
                                         <tr>
-                                            <td colSpan={4} className="text-center py-4">
-                                                Cargando pacientes...
-                                            </td>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CID</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Apellido</th>
+                                            <th className="px-6 py-3"></th>
                                         </tr>
-                                    ) : pacientes.length === 0 ? (
-                                        <tr>
-                                            <td colSpan={4} className="text-center py-4">
-                                                No se encontraron pacientes
-                                            </td>
-                                        </tr>
-                                    ) : (
-                                        pacientes.map((paciente) => (
-                                            <tr
-                                                key={paciente.cod_paciente}
-                                                className="border-b hover:bg-gray-50"
-                                            >
-                                                <td className="px-4 py-2">{paciente.CID}</td>
-                                                <td className="px-4 py-2">{paciente.nombre}</td>
-                                                <td className="px-4 py-2">{paciente.apellido}</td>
-                                                <td className="px-4 py-2">
-                                                    <button
-                                                        onClick={() => onSelect(paciente)}
-                                                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                                                    >
-                                                        Seleccionar
-                                                    </button>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                        {isLoading ? (
+                                            <tr>
+                                                <td colSpan={4} className="px-6 py-4 text-center">
+                                                    <div className="flex justify-center items-center">
+                                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#5FAAD9]"></div>
+                                                    </div>
                                                 </td>
                                             </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div className="mt-4 flex justify-end">
-                            <button
-                                onClick={onClose}
-                                className="px-4 py-2 text-gray-600 hover:text-gray-800"
-                            >
-                                Cancelar
-                            </button>
+                                        ) : pacientes.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
+                                                    No se encontraron pacientes
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            pacientes.map((paciente) => (
+                                                <tr
+                                                    key={paciente.cod_paciente}
+                                                    className="hover:bg-[#C4E5F2] transition-colors"
+                                                >
+                                                    <td className="px-6 py-4 whitespace-nowrap">{paciente.CID}</td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">{paciente.nombre}</td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">{paciente.apellido}</td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                                                        <button
+                                                            onClick={() => onSelect(paciente)}
+                                                            className="inline-flex items-center px-4 py-2 bg-[#5FAAD9] text-white rounded-lg hover:bg-[#035AA6] transition-colors"
+                                                        >
+                                                            <FaUser className="mr-2" />
+                                                            Seleccionar
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </motion.div>
-                </motion.div>
+                </div>
             )}
         </AnimatePresence>
     );
