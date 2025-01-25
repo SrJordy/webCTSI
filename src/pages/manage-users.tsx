@@ -48,15 +48,15 @@ const ManageUsersPage = () => {
         return users.filter(user => {
             try {
                 const searchTermLower = searchTerm.toLowerCase().trim();
-                
-                const matchesSearch = 
+
+                const matchesSearch =
                     (user?.nombre?.toLowerCase() || '').includes(searchTermLower) ||
                     (user?.apellido?.toLowerCase() || '').includes(searchTermLower) ||
                     (user?.email?.toLowerCase() || '').includes(searchTermLower) ||
                     (user?.CID?.toString() || '').includes(searchTermLower);
-                
+
                 const matchesRole = filterRole === "TODOS" || user?.rol === filterRole;
-                
+
                 return matchesSearch && matchesRole;
             } catch (error) {
                 console.error('Error al filtrar usuario:', error);
@@ -90,7 +90,7 @@ const ManageUsersPage = () => {
         const headers = ['Nombre', 'Apellido', 'CDI', 'Correo', 'Teléfono', 'Rol'];
         const csvContent = [
             headers.join(','),
-            ...filteredUsers.map(user => 
+            ...filteredUsers.map(user =>
                 [user.nombre, user.apellido, user.CID, user.email, user.telefono, user.rol].join(',')
             )
         ].join('\n');
@@ -118,7 +118,11 @@ const ManageUsersPage = () => {
                     <h1 className="text-3xl font-bold text-gray-800">
                         Gestión de Usuarios
                         <span className="ml-2 text-sm font-normal text-gray-500">
-                            ({filteredUsers.length} usuarios)
+                            {isLoading ? (
+                                <span className="inline-block animate-pulse">Cargando...</span>
+                            ) : (
+                                `(${filteredUsers.length} usuarios)`
+                            )}
                         </span>
                     </h1>
                     <motion.button
@@ -200,8 +204,8 @@ const ManageUsersPage = () => {
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className={`px-2 py-1 rounded-full text-xs font-medium
                                                     ${user.rol === 'PROFESIONAL' ? 'bg-purple-100 text-purple-800' :
-                                                    user.rol === 'CUIDADOR' ? 'bg-blue-100 text-blue-800' :
-                                                    'bg-green-100 text-green-800'}`}>
+                                                        user.rol === 'CUIDADOR' ? 'bg-blue-100 text-blue-800' :
+                                                            'bg-green-100 text-green-800'}`}>
                                                     {user.rol}
                                                 </span>
                                             </td>
@@ -213,7 +217,7 @@ const ManageUsersPage = () => {
                                                         className="text-yellow-600 hover:text-yellow-900"
                                                         onClick={() => {
                                                             setUserToEdit(user);
-                                                            setIsModalOpen(true);  
+                                                            setIsModalOpen(true);
                                                         }}
                                                     >
                                                         <FaEdit size={20} />
@@ -223,7 +227,7 @@ const ManageUsersPage = () => {
                                                         whileTap={{ scale: 0.9 }}
                                                         className="text-red-600 hover:text-red-900"
                                                         onClick={() => {
-                                                            console.log("USUARIO:",user.cod_usuario)
+                                                            console.log("USUARIO:", user.cod_usuario)
                                                             setUserToDelete(user.cod_usuario);
                                                             setIsDeleteModalOpen(true);
                                                         }}
@@ -305,9 +309,9 @@ const ManageUsersPage = () => {
                     onSubmit={async (userData) => {
                         try {
                             if (userToEdit) {
-                                setUsers(users.map(user => 
-                                    user.cod_usuario === userToEdit.cod_usuario 
-                                        ? { ...user, ...userData } 
+                                setUsers(users.map(user =>
+                                    user.cod_usuario === userToEdit.cod_usuario
+                                        ? { ...user, ...userData }
                                         : user
                                 ));
                                 toast.success('Usuario actualizado exitosamente');
@@ -317,7 +321,7 @@ const ManageUsersPage = () => {
                             }
                             setIsModalOpen(false);
                             setUserToEdit(null);
-                        } catch (error) {
+                        } catch {
                             toast.error('Error al procesar el usuario');
                         }
                     }}
