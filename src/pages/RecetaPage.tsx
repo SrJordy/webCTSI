@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import MainLayout from '../layouts/MainLayout';
-import { FaPlus, FaTrash, FaClock, FaPills, FaUser } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaClock, FaPills, FaUser, FaArrowLeft } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import * as RecetaService from '../service/RecetaService';
 import SelectPatientModal from '../components/SelectPatientModal';
@@ -8,6 +8,7 @@ import axios from 'axios';
 import { motion } from 'framer-motion';
 import SuccessModal from '../components/SuccessModal';
 import { useNavigate } from 'react-router-dom';
+
 
 
 interface Paciente {
@@ -57,8 +58,8 @@ export const RecetaPage = () => {
     const [selectedPatient, setSelectedPatient] = useState<Paciente | null>(null);
     const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [showSuccessModal, setShowSuccessModal] = useState(false); 
-    const [successMessage, setSuccessMessage] = useState(''); 
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
 
     useEffect(() => {
         const userString = localStorage.getItem('user');
@@ -223,18 +224,29 @@ export const RecetaPage = () => {
 
     return (
         <MainLayout>
-            <motion.div 
+            <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
                 className="min-h-full bg-[#C4E5F2] -m-8 p-8">
-                <motion.div 
+                <motion.div
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.2 }}
                     className="max-w-6xl mx-auto">
                     <div className="bg-white rounded-xl shadow-lg p-6">
-                        <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">Nueva Receta Médica</h2>
+                        <div className="flex justify-between items-center mb-6 border-b pb-2">
+                            <div className="flex items-center">
+                                <button
+                                    type="button"
+                                    onClick={() => navigate('/managerecipes')}
+                                    className="mr-4 text-gray-600 hover:text-[#035AA6] transition-colors"
+                                >
+                                    <FaArrowLeft size={24} />
+                                </button>
+                                <h2 className="text-2xl font-bold text-gray-800">Nueva Receta Médica</h2>
+                            </div>
+                        </div>
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="bg-gray-50 p-6 rounded-xl">
                                 <div className="flex justify-between items-center mb-4">

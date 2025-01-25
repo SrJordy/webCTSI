@@ -19,9 +19,10 @@ interface Medicamento {
     receta_id?: number;
 }
 
-interface RecetaData {
+export interface RecetaData {
     persona_id: number;
     profesional_id: number;
+    cod_receta?: number;
 }
 
 const axiosConfig = {
@@ -53,7 +54,7 @@ export const getReceta = async (id: number): Promise<RecetaData[]> => {
     }
 };
 
-export const getRecetaConMedicamentos = async (id: number): Promise<RecetaData[]> => {
+export const getRecetaConMedicamentos = async (id: number): Promise<RecetaData> => {
     try {
         const response = await axios.get(`${API_URL}/recipedetails?id=${id}`, axiosConfig);
         return response.data;
@@ -117,20 +118,22 @@ export const createReceta = async (
 export const updateReceta = async (
     id: number,
     recetaData: RecetaData,
-    medicamentos: Array<Medicamento & { recordatorioModificado?: boolean }>,
-    recordatorios: Array<Omit<Recordatorio, 'medicamento_id'>>
-): Promise<{ receta: RecetaData; medicamentos: Medicamento[] }> => {
+    medicamentos: Array<Medicamento>
+) => {
     try {
-        const recetaResponse = await axios.put(`${API_URL}/updaterecipe?id=${id}`, recetaData, axiosConfig);
-        const cod_receta = recetaResponse.data.cod_receta;
         const medicamentosActualizados = await Promise.all(medicamentos.map(async (medicamento) => {
+            // Datos del medicamento según el schema
             const medicamentoData = {
-                ...medicamento,
-                receta_id: cod_receta
+                nombre: medicamento.nombre,
+                descripcion: medicamento.descripcion,
+                frecuenciamin: Number(medicamento.frecuenciamin),
+                cantidadtotal: Number(medicamento.cantidadtotal),
+                receta_id: id
             };
 
-            let medicamentoActualizado;
+            console.log('Datos del medicamento a actualizar:', medicamentoData);
 
+            let medicamentoActualizado;
             if (medicamento.cod_medicamento) {
                 medicamentoActualizado = await axios.put(
                     `${API_URL}/updateMedication?id=${medicamento.cod_medicamento}`,
@@ -145,45 +148,51 @@ export const updateReceta = async (
                 );
             }
 
-            return {
-                cod_medicamento: medicamentoActualizado.data.cod_medicamento,
-                ...medicamento
-            };
-        }));
+            // Si el recordatorio fue modificado, manejarlo por separado
+            if (medicamento.recordatorioModificado) {
+                const med_id = medicamento.cod_medicamento || medicamentoActualizado.data.cod_medicamento;
+                
+                if (medicamento.cod_medicamento) {
+                    console.log('Eliminando recordatorios existentes para medicamento:', med_id);
+                    await deleteRecordatorio(med_id);
+                }
 
-        // 3. Procesar los recordatorios
-        await Promise.all(medicamentosActualizados.map(async (medicamento, index) => {
-            const recordatorioActual = recordatorios[index];
+                if (medicamento.recordatorio.fechahora) {
+                    const cantidadTotal = Number(medicamento.cantidadtotal);
+                    const frecuencia = Number(medicamento.frecuenciamin);
 
-            // Solo procesar si el recordatorio fue modificado
-            if (medicamento.recordatorioModificado && medicamento.cod_medicamento) {
-                // Eliminar recordatorios existentes
-                await deleteRecordatorio(medicamento.cod_medicamento);
+                    console.log('Creando nuevos recordatorios:', {
+                        cantidadTotal,
+                        frecuencia,
+                        fechaInicial: medicamento.recordatorio.fechahora
+                    });
 
-                // Crear nuevos recordatorios
-                const cantidadRecordatorios = medicamento.cantidadtotal;
+                    for (let i = 0; i < cantidadTotal; i++) {
+                        const fechaBase = new Date(medicamento.recordatorio.fechahora);
+                        fechaBase.setMinutes(fechaBase.getMinutes() + i * frecuencia);
 
-                for (let i = 0; i < cantidadRecordatorios; i++) {
-                    const fechaHora = new Date(recordatorioActual.fechahora);
-                    fechaHora.setMinutes(fechaHora.getMinutes() + i * medicamento.frecuenciamin);
+                        const recordatorioData = {
+                            medicamento_id: med_id,
+                            fechahora: fechaBase,
+                            persona_id: recetaData.persona_id,
+                            estado: true
+                        };
 
-                    const recordatorioData = {
-                        medicamento_id: medicamento.cod_medicamento,
-                        fechahora: fechaHora,
-                        persona_id: recetaData.persona_id,
-                        estado: true
-                    };
-                    await createRecordatorio(recordatorioData);
+                        console.log('Creando recordatorio:', recordatorioData);
+                        await createRecordatorio(recordatorioData);
+                    }
                 }
             }
+
+            return medicamentoActualizado.data;
         }));
 
         return {
-            receta: recetaResponse.data,
+            receta: recetaData,
             medicamentos: medicamentosActualizados
         };
     } catch (error) {
-        console.error("Error al actualizar la receta:", error);
+        console.error('Error detallado en updateReceta:', error);
         throw error;
     }
 };
@@ -206,5 +215,16 @@ export const deleteReceta = async (id: number): Promise<void> => {
     } catch (error) {
         console.error("Error al eliminar la receta y sus dependencias", error);
         throw new Error("Error al eliminar la receta y sus dependencias");
+    }
+};
+
+export const deleteMedicamento = async (id: number): Promise<void> => {
+    try {
+        console.log('Eliminando medicamento:', id);
+        await axios.delete(`${API_URL}/deleteMedication?id=${id}`, axiosConfig);
+        console.log('Medicamento eliminado exitosamente');
+    } catch (error) {
+        console.error("Error al eliminar el medicamento:", error);
+        throw new Error("Error al eliminar el medicamento");
     }
 };
