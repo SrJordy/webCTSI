@@ -56,9 +56,18 @@ const TratamientosListPage = () => {
     }, []);
 
     const filteredTratamientos = useMemo(() => {
-        return tratamientos.filter(tratamiento =>
-            tratamiento.descripcion.toLowerCase().includes(searchTerm.toLowerCase())
-        );
+        return tratamientos.filter(tratamiento => {
+            const pacienteNombre = tratamiento.historial?.persona?.nombre.toLowerCase() || '';
+            const pacienteApellido = tratamiento.historial?.persona?.apellido.toLowerCase() || '';
+            const descripcion = tratamiento.descripcion.toLowerCase();
+            const searchTermLower = searchTerm.toLowerCase();
+
+            return (
+                descripcion.includes(searchTermLower) ||
+                pacienteNombre.includes(searchTermLower) ||
+                pacienteApellido.includes(searchTermLower)
+            );
+        });
     }, [tratamientos, searchTerm]);
 
     const paginatedTratamientos = useMemo(() => {
@@ -97,7 +106,7 @@ const TratamientosListPage = () => {
                     <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-300 flex items-center gap-2"
+                        className="bg-[#5FAAD9] text-white px-6 py-2 rounded-lg hover:bg-[#035AA6]  transition-colors duration-300 flex items-center gap-2"
                         onClick={() => {
                             setTratamientoToEdit(null);
                             setIsFormModalOpen(true);
@@ -155,7 +164,7 @@ const TratamientosListPage = () => {
                                         <motion.button
                                             whileHover={{ scale: 1.1 }}
                                             whileTap={{ scale: 0.9 }}
-                                            className="text-blue-500 hover:text-blue-700"
+                                            className="text-yellow-500 hover:text-blue-700"
                                             onClick={() => {
                                                 setTratamientoToEdit(tratamiento);
                                                 setIsFormModalOpen(true);
