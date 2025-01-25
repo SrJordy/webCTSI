@@ -10,6 +10,7 @@ import RecetasListPage from './pages/managerecipes';
 import TratamientosListPage from './pages/Tratamientos';
 import ExamenesPage from './pages/examenPage';
 import DiagnosticosPage from './pages/diagnostico';
+import CitasPage from './pages/CitasPage';
 
 const App = () => {
   return (
@@ -27,6 +28,7 @@ const App = () => {
         <Route path="/Tratamientos" element={<TratamientosListPage />} />
         <Route path="/Examenes" element={<ExamenesPage />} />
         <Route path="/Diagnosticos" element={<DiagnosticosPage />} />
+        <Route path="/Cites" element={<CitasPage />} />
       </Routes>
     </BrowserRouter>
   );

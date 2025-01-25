@@ -12,7 +12,8 @@ import {
     MdReceipt,
     MdAssignmentAdd,
     MdNote,
-    MdDescription
+    MdDescription,
+    MdAccessAlarm
 } from 'react-icons/md';
 
 interface MenuItem {
@@ -49,6 +50,7 @@ const Sidebar = () => {
         { title: 'Tratamientos', path: '/Tratamientos', icon: MdAssignmentAdd},
         { title: 'Examenes', path: '/Examenes', icon: MdNote},
         { title: 'Diagnosticos', path: '/Diagnosticos', icon: MdDescription},
+        { title: 'Citas', path: '/Cites', icon: MdAccessAlarm},
     ];
 
     const handleLogout = () => {
