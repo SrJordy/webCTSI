@@ -16,6 +16,7 @@ interface Medicamento {
     frecuenciamin: number;
     cantidadtotal: number;
     receta_id: number;
+    personaId: number;
 }
 
 interface Receta {
@@ -35,6 +36,7 @@ interface Receta {
     };
     medicamentos: Medicamento[];
 }
+
 
 export const RecetasListPage = () => {
     const [recetas, setRecetas] = useState<Receta[]>([]);
@@ -59,7 +61,7 @@ export const RecetasListPage = () => {
         try {
             setLoading(true);
             const response = await RecetaService.getAllRecetas();
-            setRecetas(response || []);
+            setRecetas(response as unknown as Receta[] || []);
         } catch (error) {
             console.error('Error al cargar las recetas:', error);
             toast.error('Error al cargar las recetas');
@@ -70,8 +72,8 @@ export const RecetasListPage = () => {
     };
 
     const handleEditReceta = (recetaId: number) => {
-        setSelectedRecetaId(recetaId); 
-        setIsEditModalOpen(true); 
+        setSelectedRecetaId(recetaId);
+        setIsEditModalOpen(true);
     };
 
     const handleDelete = async (recetaId: number) => {
@@ -101,7 +103,7 @@ export const RecetasListPage = () => {
             const recetaDate = new Date(receta.fecha);
             if (isNaN(recetaDate.getTime())) {
                 console.error(`Fecha inválida para receta con ID ${receta.cod_receta}: ${receta.fecha}`);
-                matchesDate = false; 
+                matchesDate = false;
             } else {
                 matchesDate = recetaDate.toISOString().split('T')[0] === dateFilter;
             }
@@ -110,7 +112,6 @@ export const RecetasListPage = () => {
         return matchesSearch && matchesDate;
     });
 
-    // Paginación
     const indexOfLastReceta = currentPage * itemsPerPage;
     const indexOfFirstReceta = indexOfLastReceta - itemsPerPage;
     const currentRecetas = filteredRecetas.slice(indexOfFirstReceta, indexOfLastReceta);
@@ -195,7 +196,7 @@ export const RecetasListPage = () => {
                                             className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                                             onClick={async () => {
                                                 const recetaConMedicamentos = await RecetaService.getRecetaConMedicamentos(receta.cod_receta);
-                                                setSelectedReceta(recetaConMedicamentos);
+                                                setSelectedReceta(recetaConMedicamentos as unknown as Receta);
                                                 setShowDetailModal(true);
                                             }}
                                         >
@@ -220,7 +221,7 @@ export const RecetasListPage = () => {
                                                         className="text-yellow-500 hover:text-yellow-700 mr-2"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            handleEditReceta(receta.cod_receta); 
+                                                            handleEditReceta(receta.cod_receta);
                                                         }}
                                                     >
                                                         <FaEdit size={20} />
@@ -235,7 +236,7 @@ export const RecetasListPage = () => {
                                                             setShowDeleteModal(true);
                                                         }}
                                                     >
-                                                        <FaTrash size={20}/>
+                                                        <FaTrash size={20} />
                                                     </motion.button>
                                                 </div>
                                             </div>
@@ -246,7 +247,6 @@ export const RecetasListPage = () => {
                         )}
                     </motion.div>
 
-                    {/* Paginación */}
                     {totalPages > 1 && (
                         <div className="flex justify-center mt-4">
                             <nav className="flex gap-2">
@@ -271,7 +271,7 @@ export const RecetasListPage = () => {
                 isOpen={showDetailModal}
                 onClose={() => {
                     setShowDetailModal(false);
-                    setSelectedReceta(null);                    
+                    setSelectedReceta(null);
                 }}
                 receta={selectedReceta}
             />
@@ -290,10 +290,7 @@ export const RecetasListPage = () => {
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
                 recetaId={selectedRecetaId || 0}
-                personaId={selectedReceta?.persona.cod_persona || 0} 
-                profesionalId={selectedReceta?.profesional.cod_profesional || 0} 
             />
-            
         </MainLayout>
     );
 };
