@@ -8,8 +8,16 @@ import { toast } from "react-hot-toast";
 interface UserFormModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSubmit: (userData: any) => void;
-    userToEdit?: any;
+    onSubmit: (userData: { nombre: string; apellido: string; CID: string; telefono: string; email: string; rol: string; password: string }) => void;
+    userToEdit?: {
+        nombre?: string;
+        apellido?: string;
+        CID?: string | number;
+        telefono?: string | number;
+        email?: string;
+        rol?: string;
+        cod_usuario?: string | number;
+    };
 }
 
 const UserFormModal: React.FC<UserFormModalProps> = ({
@@ -106,15 +114,19 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
 
         setIsSubmitting(true);
         try {
-            const data: { [key: string]: any, password?: string } = {
+            const data: { nombre: string; apellido: string; CID: string; telefono: string; email: string; rol: string; password?: string } = {
                 ...formData,
                 CID: formData.CID,
-                telefono: formData.telefono, // Como string
+                telefono: formData.telefono, 
             };
 
             if (userToEdit) {
                 if (!data.password) delete data.password;
-                await updateUser(userToEdit.cod_usuario, data);
+                if (typeof userToEdit.cod_usuario === 'number') {
+                    await updateUser(userToEdit.cod_usuario, data);
+                } else {
+                    throw new Error('Invalid user ID');
+                }
                 setSuccessMessage("Usuario actualizado exitosamente");
             } else {
                 console.log("datos del USUARIO:", data)

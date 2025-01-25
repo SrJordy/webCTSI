@@ -40,10 +40,15 @@ interface Cuidador {
 }
 
 interface PacienteFormModalProps {
+
     isOpen: boolean;
+
     onClose: () => void;
+
     onSubmit: () => void;
-    pacienteToEdit?: Paciente;
+
+    pacienteToEdit?: Paciente | null;
+
 }
 
 const PacienteFormModal: React.FC<PacienteFormModalProps> = ({

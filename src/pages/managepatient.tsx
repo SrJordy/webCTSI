@@ -21,6 +21,8 @@ interface Paciente {
         nombre: string;
         apellido: string;
     };
+    direccion: string;
+    cuidador_id: number;
 }
 
 const ManagePatientsPage = () => {
@@ -145,7 +147,10 @@ const ManagePatientsPage = () => {
                     <h1 className="text-3xl font-bold text-gray-800">
                         Gestión de Pacientes
                         <span className="ml-2 text-sm font-normal text-gray-500">
-                            ({filteredPatients.length} pacientes)
+                            {isLoading ? ( 
+                                <span className="inline-block animate-pulse">Cargando...</span> 
+                                ) :(
+                                `($filteredPatients.length pacientes)`)}
                         </span>
                     </h1>
                     <motion.button
