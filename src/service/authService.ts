@@ -7,7 +7,11 @@ export const loginWithCredentials = async (email: string, password: string) => {
     try {
         const response = await axios.post(LOGIN_URL, { email, password });
         return response.data;
-    } catch (error: any) {
-        throw new Error(error.response?.data?.error || 'Error al iniciar sesión');
+    } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            throw new Error(error.response?.data?.error || 'Error al iniciar sesión');
+        } else {
+            throw new Error('Error al iniciar sesión');
+        }
     }
 };
