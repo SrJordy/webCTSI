@@ -150,7 +150,7 @@ const ManagePatientsPage = () => {
                             {isLoading ? ( 
                                 <span className="inline-block animate-pulse">Cargando...</span> 
                                 ) :(
-                                `($filteredPatients.length pacientes)`)}
+                                `(${filteredPatients.length} pacientes)`)}
                         </span>
                     </h1>
                     <motion.button
