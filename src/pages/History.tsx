@@ -17,7 +17,7 @@ interface HistorialMedico {
     estatura: number;
     temperatura?: number;
     nivel_glucosa?: number;
-    fecha: Date | string; 
+    fecha: Date | string;
     profesional_id: number;
     persona_id: number;
     estado: boolean;
@@ -30,6 +30,11 @@ interface HistorialMedico {
         cod_paciente: number;
         nombre: string;
         apellido: string;
+        fecha_nacimiento?: Date;
+        genero?: string;
+        direccion?: string;
+        telefono?: string;
+        email?: string;
     };
 }
 
@@ -47,7 +52,10 @@ const HistoryPage = () => {
     const itemsPerPage = 8;
     const navigate = useNavigate();
     const handleEdit = (historial: HistorialMedico) => {
-        setHistorialToEdit(historial);
+        setHistorialToEdit({
+            ...historial,
+            fecha: typeof historial.fecha === 'string' ? new Date(historial.fecha) : historial.fecha
+        });
         setIsFormModalOpen(true);
     };
 
@@ -55,7 +63,15 @@ const HistoryPage = () => {
         setIsLoading(true);
         try {
             const data = await HistoryService.getAllHistories();
-            setHistories(data);
+            const transformedData = data.map(history => ({
+                ...history,
+                fecha: new Date(history.fecha),
+                persona: history.persona ? {
+                    ...history.persona,
+                    cod_paciente: history.persona.cod_paciente || 0
+                } : undefined
+            }));
+            setHistories(transformedData);
             toast.success('Historiales médicos cargados exitosamente');
         } catch (error) {
             console.error('Error al obtener historiales:', error);
@@ -82,14 +98,14 @@ const HistoryPage = () => {
                 if (typeof history.fecha === 'string') {
                     recetaDate = new Date(history.fecha);
                 } else {
-                    recetaDate = history.fecha; 
+                    recetaDate = history.fecha;
                 }
 
                 if (isNaN(recetaDate.getTime())) {
                     console.error(`Fecha inválida para historial con ID ${history.cod_historial}: ${history.fecha}`);
-                    matchesDate = false; 
+                    matchesDate = false;
                 } else {
-                    matchesDate = recetaDate.toISOString().split('T')[0] === filterDate; 
+                    matchesDate = recetaDate.toISOString().split('T')[0] === filterDate;
                 }
             }
 

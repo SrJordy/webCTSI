@@ -20,6 +20,7 @@ interface HistorialMedico {
         apellido: string;
     };
     persona?: {
+        cod_paciente: number;
         nombre: string;
         apellido: string;
         fecha_nacimiento: Date;
