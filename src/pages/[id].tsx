@@ -30,23 +30,24 @@ export interface HistorialMedico {
         cod_paciente: number;
         nombre: string;
         apellido: string;
-        fecha_nacimiento: Date;
+        fecha_nac: Date;
         genero: string;
         direccion: string;
         telefono: string;
         email: string;
+        CID: string;
     };
-    tratamientos?: Array<{
+    tratamiento?: Array<{
         cod_tratamiento: number;
         descripcion: string;
-        fecha_inicio: Date;
-        fecha_fin?: Date;
+        fechainicio: Date;
+        fechafin?: Date;
         estado: boolean;
     }>;
-    diagnosticos?: Array<{
+    diagnostico?: Array<{
         cod_diagnostico: number;
         descripcion: string;
-        fecha: Date;
+        fecha_diagnostico: Date;
         estado: boolean;
     }>;
     examenes?: Array<{
@@ -70,7 +71,7 @@ const HistorialView = () => {
             if (id) {
                 try {
                     const data = await HistoryService.getHistory(Number(id));
-                    setHistorial(data);
+                    setHistorial(data as unknown as HistorialMedico);
                 } catch (error) {
                     console.error('Error al obtener el historial:', error);
                     toast.error('Error al cargar el historial médico');
@@ -157,7 +158,7 @@ const HistorialView = () => {
                                                 <FaIdCard className="text-indigo-600" />
                                                 <div>
                                                     <p className="text-sm text-gray-600">Identificación</p>
-                                                    <p className="font-semibold text-gray-800">{historial.persona.CID}</p>
+                                                    <p className="font-semibold text-gray-800">{historial.persona?.CID}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -166,7 +167,7 @@ const HistorialView = () => {
                                                 <FaUser className="text-indigo-600" />
                                                 <div>
                                                     <p className="text-sm text-gray-600">Nombre completo</p>
-                                                    <p className="font-semibold text-gray-800">{historial.persona.nombre} {historial.persona.apellido}</p>
+                                                    <p className="font-semibold text-gray-800">{historial.persona?.nombre} {historial.persona?.apellido}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -175,7 +176,7 @@ const HistorialView = () => {
                                                 <FaBirthdayCake className="text-indigo-600" />
                                                 <div>
                                                     <p className="text-sm text-gray-600">Fecha de nacimiento</p>
-                                                    <p className="font-semibold text-gray-800">{formatDate(historial.persona.fecha_nac)}</p>
+                                                    <p className="font-semibold text-gray-800">{historial.persona?.fecha_nac ? formatDate(historial.persona.fecha_nac) : 'Fecha no especificada'}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -186,7 +187,7 @@ const HistorialView = () => {
                                                 <FaVenusMars className="text-indigo-600" />
                                                 <div>
                                                     <p className="text-sm text-gray-600">Género</p>
-                                                    <p className="font-semibold text-gray-800">{historial.persona.genero}</p>
+                                                    <p className="font-semibold text-gray-800">{historial.persona?.genero}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -195,7 +196,7 @@ const HistorialView = () => {
                                                 <FaPhone className="text-indigo-600" />
                                                 <div>
                                                     <p className="text-sm text-gray-600">Teléfono</p>
-                                                    <p className="font-semibold text-gray-800">{historial.persona.telefono}</p>
+                                                    <p className="font-semibold text-gray-800">{historial.persona?.telefono}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -204,7 +205,7 @@ const HistorialView = () => {
                                                 <FaMapMarkerAlt className="text-indigo-600" />
                                                 <div>
                                                     <p className="text-sm text-gray-600">Dirección</p>
-                                                    <p className="font-semibold text-gray-800">{historial.persona.direccion || 'No especificada'}</p>
+                                                    <p className="font-semibold text-gray-800">{historial.persona?.direccion || 'No especificada'}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -271,7 +272,7 @@ const HistorialView = () => {
                                         {historial.tratamiento.map((tratamiento) => (
                                             <div key={tratamiento.cod_tratamiento} className="bg-white p-4 rounded-lg shadow-sm">
                                                 <p className="font-semibold text-gray-800">{tratamiento.descripcion}</p>
-                                                <p className="text-sm text-gray-500 mt-2">{formatDate(tratamiento.fechainicio)} - {formatDate(tratamiento.fechafin)}</p>
+                                                <p className="text-sm text-gray-500 mt-2">{formatDate(tratamiento.fechainicio)} - {tratamiento.fechafin ? formatDate(tratamiento.fechafin) : 'Fecha no especificada'}</p>
                                             </div>
                                         ))}
                                     </div>
