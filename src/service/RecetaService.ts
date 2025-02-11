@@ -23,6 +23,7 @@ export interface RecetaData {
     persona_id: number;
     profesional_id: number;
     cod_receta?: number;
+    dispositivo_id?: string;
 }
 
 const axiosConfig = {
@@ -31,6 +32,7 @@ const axiosConfig = {
     },
     withCredentials: true
 };
+
 
 export const getAllRecetas = async (): Promise<RecetaData[]> => {
     try {
@@ -51,6 +53,18 @@ export const getReceta = async (id: number): Promise<RecetaData[]> => {
     } catch (error) {
         console.error("Error al obtener la receta", error);
         throw new Error("Error al obtener la receta");
+    }
+};
+
+export const getDispositivoId = async (recetaId: number): Promise<string | null> => {
+    try {
+        const response = await axios.get(`${API_URL}/recipedetails?id=${recetaId}`, axiosConfig);
+        const dispositivoId = response.data.persona.cuidador.dispositivo_id;
+        console.log('Dispositivo ID obtenido:', dispositivoId);
+        return dispositivoId || null; 
+    } catch (error) {
+        console.error("Error al obtener el dispositivo ID", error);
+        throw new Error("Error al obtener el dispositivo ID");
     }
 };
 
@@ -100,7 +114,17 @@ export const createReceta = async (
                         persona_id: recetaData.persona_id,
                         estado: true
                     };
-                    await createRecordatorio(recordatorioData);
+
+                    if (cod_receta !== undefined) {
+                        const dispositivoId = await getDispositivoId(cod_receta);
+                        if (dispositivoId) {
+                            await createRecordatorio(recordatorioData, dispositivoId); 
+                        } else {
+                            console.error("dispositivoId is null");
+                        }
+                    } else {
+                        console.error("recetaData.cod_receta is undefined");
+                    }
                 }
             }
         }));
@@ -122,7 +146,6 @@ export const updateReceta = async (
 ) => {
     try {
         const medicamentosActualizados = await Promise.all(medicamentos.map(async (medicamento) => {
-            // Datos del medicamento según el schema
             const medicamentoData = {
                 nombre: medicamento.nombre,
                 descripcion: medicamento.descripcion,
@@ -148,7 +171,6 @@ export const updateReceta = async (
                 );
             }
 
-            // Si el recordatorio fue modificado, manejarlo por separado
             if (medicamento.recordatorioModificado) {
                 const med_id = medicamento.cod_medicamento || medicamentoActualizado.data.cod_medicamento;
                 
@@ -178,8 +200,16 @@ export const updateReceta = async (
                             estado: true
                         };
 
-                        console.log('Creando recordatorio:', recordatorioData);
-                        await createRecordatorio(recordatorioData);
+                        if (id !== undefined) {
+                            const dispositivoId = await getDispositivoId(id);
+                            if (dispositivoId) {
+                                await createRecordatorio(recordatorioData, dispositivoId); 
+                            } else {
+                                console.error("dispositivoId is null");
+                            }
+                        } else {
+                            console.error("recetaData.cod_receta is undefined");
+                        }
                     }
                 }
             }
