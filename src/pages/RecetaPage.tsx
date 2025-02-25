@@ -132,6 +132,7 @@ export const RecetaPage = () => {
         };
         setFormData({ ...formData, medicamentos: newMedicamentos });
     };
+    
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

@@ -9,7 +9,7 @@ import SuccessModal from './SuccessModal';
 
 interface Cita {
     cod_cita?: number;
-    fechahora: string;
+    fechahora: Date;
     lugar: string;
     motivo: string;
     persona_id: number;
@@ -33,12 +33,20 @@ interface CitaModalProps {
 
 const CitaModal: React.FC<CitaModalProps> = ({ isOpen, onClose, onSubmit, cita }) => {
     const [formData, setFormData] = useState({
-        fechahora: new Date().toISOString().slice(0, 16),
+        fechahora: '',
         lugar: '',
         motivo: '',
         persona_id: 0,
         profesional_id: 0
     });
+
+    const toLocalISOString = (dateString: string) => {
+        const date = new Date(dateString);
+        date.setHours(date.getHours() - 5); 
+        const pad = (num: number) => num.toString().padStart(2, '0');
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    };
+    
 
     const [displayData, setDisplayData] = useState({
         paciente: '',
@@ -70,24 +78,23 @@ const CitaModal: React.FC<CitaModalProps> = ({ isOpen, onClose, onSubmit, cita }
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        
+    
         if (!formData.persona_id || !formData.profesional_id) {
             setError('Por favor seleccione un paciente y un profesional');
             return;
         }
-
-        console.log('Datos a enviar:', {
-            ...formData,
-            displayData,
-            modo: cita ? 'edición' : 'creación'
-        });
-
+    
+        const adjustedDate = new Date(formData.fechahora);
+        adjustedDate.setHours(adjustedDate.getHours()); 
+    
+        const citaData = { ...formData, fechahora: adjustedDate.toISOString() };
+    
         try {
             setIsLoading(true);
             if (cita?.cod_cita) {
-                await updateCita(cita.cod_cita, formData);
+                await updateCita(cita.cod_cita, citaData);
             } else {
-                await createCita(formData);
+                await createCita(citaData);
             }
             setShowSuccessModal(true);
         } catch (error) {
@@ -97,6 +104,7 @@ const CitaModal: React.FC<CitaModalProps> = ({ isOpen, onClose, onSubmit, cita }
             setIsLoading(false);
         }
     };
+    
 
     interface Persona {
         cod_paciente: number;
@@ -171,7 +179,7 @@ const CitaModal: React.FC<CitaModalProps> = ({ isOpen, onClose, onSubmit, cita }
                                         </div>
                                         <input
                                             type="datetime-local"
-                                            value={formData.fechahora}
+                                            value={formData.fechahora ? toLocalISOString(formData.fechahora):''}
                                             onChange={(e) => setFormData(prev => ({...prev, fechahora: e.target.value}))}
                                             className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5FAAD9] focus:border-transparent"
                                             required
