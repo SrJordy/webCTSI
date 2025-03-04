@@ -15,19 +15,24 @@ interface HistorialMedico {
     persona_id: number;
     estado: boolean;
     profesional?: {
-        cod_usuario: number;
+        cod_usuario?: number;
         nombre: string;
         apellido: string;
+        email?: string;
     };
     persona?: {
         cod_paciente: number;
         nombre: string;
         apellido: string;
-        fecha_nacimiento: Date;
+        CID: string;
+        telefono: string;
+        fecha_nac: Date;
         genero: string;
         direccion: string;
-        telefono: string;
-        email: string;
+        cuidador_id: number;
+        creadoEn?: Date;
+        actualizadoEn?: Date;
+        estado?: boolean;
     };
     diagnostico?: Diagnostico[];
     tratamiento?: Tratamiento[];
@@ -76,8 +81,16 @@ class HistoryServiceError extends Error {
         this.name = 'HistoryServiceError';
     }
 }
-const API_URL = import.meta.env.VITE_API_URL;
 
+// Interface for the modal error
+export interface HistoryModalError {
+    show: boolean;
+    message: string;
+    title: string;
+    patientName?: string;
+}
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 export const HistoryService = {
     async getAllHistories(): Promise<HistorialMedico[]> {
@@ -103,21 +116,33 @@ export const HistoryService = {
         }
     },
 
-    async checkPatientHistory(personaId: number): Promise<boolean> {
+    async checkPatientHistory(personaId: number): Promise<{hasHistory: boolean, patientInfo?: {nombre: string, apellido: string}}> {
         try {
             const histories = await this.getAllHistories();
-            return histories.some(history => 
+            const existingHistory = histories.find(history => 
                 history.persona_id === personaId && history.estado === true
             );
+            
+            if (existingHistory && existingHistory.persona) {
+                return {
+                    hasHistory: true,
+                    patientInfo: {
+                        nombre: existingHistory.persona.nombre,
+                        apellido: existingHistory.persona.apellido
+                    }
+                };
+            }
+            
+            return { hasHistory: !!existingHistory };
         } catch (error) {
             console.error('Error checking patient history:', error);
-            toast.error('Error al verificar el historial médico');
             throw new HistoryServiceError('Error al verificar el historial médico', 'CHECK_ERROR');
         }
     },
 
-    async createHistory(data: CreateHistorialMedicoDTO): Promise<HistorialMedico> {
+    async createHistory(data: CreateHistorialMedicoDTO): Promise<HistorialMedico | HistoryModalError> {
         try {
+            // Validate required fields
             if (!data.presion_arterial || !data.peso || !data.estatura || 
                 !data.fecha || !data.profesional_id || !data.persona_id) {
                 throw new HistoryServiceError('Los campos obligatorios son requeridos', 'VALIDATION_ERROR');
@@ -133,6 +158,19 @@ export const HistoryService = {
 
             if (data.temperatura && (data.temperatura < 35 || data.temperatura > 42)) {
                 throw new HistoryServiceError('La temperatura debe estar entre 35°C y 42°C', 'VALIDATION_ERROR');
+            }
+
+            // Check if patient already has an active history
+            const { hasHistory, patientInfo } = await this.checkPatientHistory(data.persona_id);
+            
+            if (hasHistory) {
+                // Return modal error object instead of throwing an error
+                return {
+                    show: true,
+                    title: "Historial Existente",
+                    message: "Este paciente ya cuenta con un historial médico activo en el sistema.",
+                    patientName: patientInfo ? `${patientInfo.nombre} ${patientInfo.apellido}` : undefined
+                };
             }
 
             const response = await axios.post(`${API_URL}/createHistory`, {
