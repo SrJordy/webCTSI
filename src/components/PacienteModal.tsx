@@ -132,9 +132,26 @@ const PacienteFormModal: React.FC<PacienteFormModalProps> = ({
         if (!formData.fecha_nac) newErrors.fecha_nac = "La fecha de nacimiento es requerida";
         if (!formData.cuidador_id) newErrors.cuidador = "Debe seleccionar un cuidador";
 
+        // Validación para adultos mayores (65 años o más)
+        if (formData.fecha_nac) {
+            const birthDate = new Date(formData.fecha_nac);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            
+            if (age < 65) {
+                newErrors.fecha_nac = "El paciente debe ser un adulto mayor (65 años o más)";
+            }
+        }
+        if (!formData.cuidador_id) newErrors.cuidador = "Debe seleccionar un cuidador";
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
+
+    
 
     const handleClose = () => {
         setFormData(initialFormState);
