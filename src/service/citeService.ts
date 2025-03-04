@@ -102,7 +102,7 @@ export const getDispositivoId = async (
     personaId: number
 ): Promise<any> => {
     try {
-        const response = await axios.get(`${API_URL}/getCitesByPersonaId`, {
+        const response = await axios.get(`${API_URL}/getpersonacita`, {
             params: { id: personaId },
         });
         return response.data;
