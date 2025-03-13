@@ -1,4 +1,3 @@
-
 import React, { useCallback, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -16,7 +15,6 @@ import { toast } from 'react-hot-toast';
 import { HistoryService } from '../service/HistoryService';
 import SelectPatientModal from './SelectPatientModal';
 import SuccessModal from './SuccessModal';
-import HistoryErrorModal from './HistoryErrorModal';
 
 interface Paciente {
     cod_paciente: number;
@@ -114,14 +112,6 @@ const HistoryFormModal: React.FC<HistoryFormModalProps> = ({
 
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
-    
-    // Add state for error modal
-    const [showErrorModal, setShowErrorModal] = useState(false);
-    const [errorModalData, setErrorModalData] = useState({
-        title: '',
-        message: '',
-        patientName: ''
-    });
 
     useEffect(() => {
         if (isOpen) {
@@ -146,22 +136,6 @@ const HistoryFormModal: React.FC<HistoryFormModalProps> = ({
             }
         }
     }, [isOpen, historialToEdit, resetForm]);
-<<<<<<< HEAD
-    
-    // Add function to check if patient already has a history
-    const checkPatientHistory = async (patientId: number): Promise<boolean> => {
-        try {
-            const histories = await HistoryService.getAllHistories();
-            return histories.some(history => 
-                history.persona_id === patientId && history.estado === true
-            );
-        } catch (error) {
-            console.error('Error checking patient history:', error);
-            return false;
-        }
-    };
-=======
->>>>>>> f3f0e3d (updates)
     
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -170,7 +144,6 @@ const HistoryFormModal: React.FC<HistoryFormModalProps> = ({
         try {
             if (!formData.profesional_id) {
                 toast.error('No se pudo identificar al profesional');
-                setIsLoading(false);
                 return;
             }
 
@@ -187,44 +160,23 @@ const HistoryFormModal: React.FC<HistoryFormModalProps> = ({
             console.log('Datos a enviar:', dataToSubmit);
 
             if (historialToEdit) {
-                // If editing, just update without checking for existing history
                 await HistoryService.updateHistory(historialToEdit.cod_historial, dataToSubmit);
                 setSuccessMessage('Historial médico actualizado exitosamente');
                 toast.success('Historial médico actualizado exitosamente');
-                setShowSuccessModal(true);
-                onSubmit();
-                onClose();
+
             } else {
-                // If creating new history
                 if (!selectedPatient) {
                     toast.error('Debe seleccionar un paciente');
-                    setIsLoading(false);
                     return;
                 }
-                
-                // Check if patient already has a history
-                const hasHistory = await checkPatientHistory(selectedPatient.cod_paciente);
-                
-                if (hasHistory) {
-                    // Show error modal
-                    setErrorModalData({
-                        title: 'Historial Existente',
-                        message: 'Este paciente ya cuenta con un historial médico activo en el sistema.',
-                        patientName: `${selectedPatient.nombre} ${selectedPatient.apellido}`
-                    });
-                    setShowErrorModal(true);
-                    setIsLoading(false);
-                    return;
-                }
-                
-                // If no existing history, create new one
                 await HistoryService.createHistory(dataToSubmit);
                 setSuccessMessage('Historial médico creado exitosamente');
                 toast.success('Historial médico creado exitosamente');
-                setShowSuccessModal(true);
-                onSubmit();
-                onClose();
             }
+            setShowSuccessModal(true);
+
+            onSubmit();
+            onClose();
         } catch (error: unknown) {
             console.error('Error en handleSubmit:', error);
             if (error instanceof Error) {
@@ -242,10 +194,6 @@ const HistoryFormModal: React.FC<HistoryFormModalProps> = ({
         setShowSuccessModal(false);
         onSubmit();
         onClose();
-    };
-    
-    const handleErrorModalClose = () => {
-        setShowErrorModal(false);
     };
 
     const tiposSangre = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
@@ -281,30 +229,6 @@ const HistoryFormModal: React.FC<HistoryFormModalProps> = ({
                                 </button>
                             </div>
 
-<<<<<<< HEAD
-                                <form onSubmit={handleSubmit} className="space-y-4">
-                                    {/* Form content remains the same */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Paciente
-                                        </label>
-                                        {historialToEdit ? (
-                                            <div className="p-2 border rounded-lg bg-gray-50">
-                                                <p className="font-medium">
-                                                    {historialToEdit.persona?.nombre} {historialToEdit.persona?.apellido}
-                                                </p>
-                                                <p className="text-sm text-gray-500">CID: {historialToEdit.persona?.CID}</p>
-                                            </div>
-                                        ) : (
-                                            <div>
-                                                {selectedPatient ? (
-                                                    <div className="p-2 border rounded-lg bg-gray-50 flex justify-between items-center">
-                                                        <div>
-                                                            <p className="font-medium">
-                                                                {selectedPatient.nombre} {selectedPatient.apellido}
-                                                            </p>
-                                                            <p className="text-sm text-gray-500">CID: {selectedPatient.CID}</p>
-=======
                             <div className="p-6">
                                 <form onSubmit={handleSubmit} className="space-y-6">
                                     {/* Patient and Date Section */}
@@ -338,7 +262,6 @@ const HistoryFormModal: React.FC<HistoryFormModalProps> = ({
                                                             >
                                                                 Cambiar
                                                             </button>
->>>>>>> f3f0e3d (updates)
                                                         </div>
                                                     ) : (
                                                         <button
@@ -546,21 +469,10 @@ const HistoryFormModal: React.FC<HistoryFormModalProps> = ({
                     }}
                 />
             </AnimatePresence>
-            
-            {/* Success Modal */}
             <SuccessModal
                 isOpen={showSuccessModal}
                 onClose={handleSuccessModalClose}
                 message={successMessage}
-            />
-            
-            {/* Error Modal for existing history */}
-            <HistoryErrorModal
-                isOpen={showErrorModal}
-                onClose={handleErrorModalClose}
-                title={errorModalData.title}
-                message={errorModalData.message}
-                patientName={errorModalData.patientName}
             />
         </>
     );
