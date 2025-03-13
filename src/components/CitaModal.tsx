@@ -7,7 +7,7 @@ import SelectPersonaModal from './SelectPatientModal';
 import SelectProfesionalModal from './SelectProfesionalModal';
 import SuccessModal from './SuccessModal';
 
-interface Cita {
+export interface Cita {
     cod_cita?: number;
     fechahora: Date;
     lugar: string;
