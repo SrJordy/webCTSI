@@ -4,11 +4,15 @@ import { FaSearch, FaTimes, FaUser } from 'react-icons/fa';
 import * as PacienteService from '../service/PacienteService';
 import { toast } from 'react-hot-toast';
 
-interface Paciente {
+export interface Paciente {
     cod_paciente: number;
     nombre: string;
     apellido: string;
     CID: string;
+    telefono: string;
+    fecha_nac: string;
+    genero: string;
+    direccion?: string;
 }
 
 interface SelectPatientModalProps {

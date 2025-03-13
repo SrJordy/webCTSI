@@ -1,6 +1,17 @@
+
 import React, { useCallback, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaWeight, FaRuler, FaThermometerHalf, FaTint, FaHeartbeat, FaNotesMedical } from 'react-icons/fa';
+import { 
+    FaWeight, 
+    FaRuler, 
+    FaThermometerHalf, 
+    FaTint, 
+    FaHeartbeat, 
+    FaNotesMedical, 
+    FaTimes, 
+    FaUserAlt, 
+    FaCalendarAlt 
+} from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import { HistoryService } from '../service/HistoryService';
 import SelectPatientModal from './SelectPatientModal';
@@ -135,6 +146,7 @@ const HistoryFormModal: React.FC<HistoryFormModalProps> = ({
             }
         }
     }, [isOpen, historialToEdit, resetForm]);
+<<<<<<< HEAD
     
     // Add function to check if patient already has a history
     const checkPatientHistory = async (patientId: number): Promise<boolean> => {
@@ -148,6 +160,8 @@ const HistoryFormModal: React.FC<HistoryFormModalProps> = ({
             return false;
         }
     };
+=======
+>>>>>>> f3f0e3d (updates)
     
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -245,20 +259,29 @@ const HistoryFormModal: React.FC<HistoryFormModalProps> = ({
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 overflow-y-auto"
                     >
                         <motion.div
                             key="modal-content"
                             initial={{ scale: 0.95, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.95, opacity: 0 }}
-                            className="bg-white rounded-lg shadow-xl w-full max-w-2xl overflow-hidden"
+                            className="bg-white rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden my-8"
                         >
-                            <div className="p-6">
-                                <h2 className="text-2xl font-bold mb-4">
+                            {/* Header */}
+                            <div className="bg-[#5FAAD9] px-6 py-4 flex justify-between items-center">
+                                <h2 className="text-xl font-bold text-white">
                                     {historialToEdit ? 'Editar Historial Médico' : 'Registrar Nuevo Historial Médico'}
                                 </h2>
+                                <button
+                                    onClick={onClose}
+                                    className="text-white hover:text-gray-200 transition-colors"
+                                >
+                                    <FaTimes className="w-5 h-5" />
+                                </button>
+                            </div>
 
+<<<<<<< HEAD
                                 <form onSubmit={handleSubmit} className="space-y-4">
                                     {/* Form content remains the same */}
                                     <div>
@@ -281,186 +304,229 @@ const HistoryFormModal: React.FC<HistoryFormModalProps> = ({
                                                                 {selectedPatient.nombre} {selectedPatient.apellido}
                                                             </p>
                                                             <p className="text-sm text-gray-500">CID: {selectedPatient.CID}</p>
+=======
+                            <div className="p-6">
+                                <form onSubmit={handleSubmit} className="space-y-6">
+                                    {/* Patient and Date Section */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="bg-[#F8FAFC] p-4 rounded-lg border border-gray-200">
+                                            <label className=" text-sm font-medium text-gray-700 mb-2 flex items-center">
+                                                <FaUserAlt className="mr-2 text-[#5FAAD9]" />
+                                                Paciente
+                                            </label>
+                                            {historialToEdit ? (
+                                                <div className="p-3 rounded-lg bg-white shadow-sm">
+                                                    <p className="font-medium">
+                                                        {historialToEdit.persona?.nombre} {historialToEdit.persona?.apellido}
+                                                    </p>
+                                                    <p className="text-sm text-gray-500">CID: {historialToEdit.persona?.CID}</p>
+                                                </div>
+                                            ) : (
+                                                <div>
+                                                    {selectedPatient ? (
+                                                        <div className="p-3 rounded-lg bg-white shadow-sm flex justify-between items-center">
+                                                            <div>
+                                                                <p className="font-medium">
+                                                                    {selectedPatient.nombre} {selectedPatient.apellido}
+                                                                </p>
+                                                                <p className="text-sm text-gray-500">CID: {selectedPatient.CID}</p>
+                                                            </div>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setIsSelectPatientModalOpen(true)}
+                                                                className="text-[#5FAAD9] hover:text-[#035AA6] font-medium text-sm"
+                                                            >
+                                                                Cambiar
+                                                            </button>
+>>>>>>> f3f0e3d (updates)
                                                         </div>
+                                                    ) : (
                                                         <button
                                                             type="button"
                                                             onClick={() => setIsSelectPatientModalOpen(true)}
-                                                            className="text-primary hover:text-primary-dark"
+                                                            className="w-full p-3 bg-white border border-gray-200 rounded-lg text-left text-gray-500 hover:bg-gray-50 hover:border-[#5FAAD9] transition-all shadow-sm"
                                                         >
-                                                            Cambiar
+                                                            Seleccionar paciente...
                                                         </button>
-                                                    </div>
-                                                ) : (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setIsSelectPatientModalOpen(true)}
-                                                        className="w-full p-2 border rounded-lg text-left text-gray-500 hover:bg-gray-50"
-                                                    >
-                                                        Seleccionar paciente...
-                                                    </button>
-                                                )}
-                                            </div>
-                                        )}
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="bg-[#F8FAFC] p-4 rounded-lg border border-gray-200">
+                                            <label className=" text-sm font-medium text-gray-700 mb-2 flex items-center">
+                                                <FaCalendarAlt className="mr-2 text-[#5FAAD9]" />
+                                                Fecha
+                                            </label>
+                                            <input
+                                                type="date"
+                                                value={formData.fecha}
+                                                onChange={(e) => setFormData({ ...formData, fecha: e.target.value })}
+                                                className="w-full p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#5FAAD9] focus:border-transparent shadow-sm"
+                                                required
+                                            />
+                                        </div>
                                     </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Fecha
-                                        </label>
-                                        <input
-                                            type="date"
-                                            value={formData.fecha}
-                                            onChange={(e) => setFormData({ ...formData, fecha: e.target.value })}
-                                            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-primary"
-                                            required
-                                        />
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Tipo de Sangre
-                                            </label>
-                                            <select
-                                                value={formData.tipo_sangre}
-                                                onChange={(e) => setFormData({ ...formData, tipo_sangre: e.target.value })}
-                                                className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-primary"
-                                            >
-                                                <option value="">Seleccionar tipo</option>
-                                                {tiposSangre.map((tipo) => (
-                                                    <option key={tipo} value={tipo}>
-                                                        {tipo}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Presión Arterial
-                                            </label>
-                                            <div className="relative">
-                                                <FaHeartbeat className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                                                <input
-                                                    type="text"
-                                                    value={formData.presion_arterial}
-                                                    onChange={(e) => setFormData({ ...formData, presion_arterial: e.target.value })}
-                                                    placeholder="Ej: 120/80"
-                                                    className="pl-10 w-full p-2 border rounded-lg focus:ring-2 focus:ring-primary"
-                                                    required
-                                                />
+                                    {/* Vital Signs Section */}
+                                    <div className="bg-[#F8FAFC] p-4 rounded-lg border border-gray-200">
+                                        <h3 className="text-lg font-semibold text-gray-800 mb-4">Signos Vitales</h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className=" text-sm font-medium text-gray-700 mb-2">
+                                                    Tipo de Sangre
+                                                </label>
+                                                <select
+                                                    value={formData.tipo_sangre}
+                                                    onChange={(e) => setFormData({ ...formData, tipo_sangre: e.target.value })}
+                                                    className="w-full p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#5FAAD9] focus:border-transparent shadow-sm"
+                                                >
+                                                    <option value="">Seleccionar tipo</option>
+                                                    {tiposSangre.map((tipo) => (
+                                                        <option key={tipo} value={tipo}>
+                                                            {tipo}
+                                                        </option>
+                                                    ))}
+                                                </select>
                                             </div>
-                                        </div>
 
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Peso (kg)
-                                            </label>
-                                            <div className="relative">
-                                                <FaWeight className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                                                <input
-                                                    type="number"
-                                                    value={formData.peso}
-                                                    onChange={(e) => setFormData({ ...formData, peso: e.target.value })}
-                                                    placeholder="Peso en kg"
-                                                    className="pl-10 w-full p-2 border rounded-lg focus:ring-2 focus:ring-primary"
-                                                    required
-                                                    min="0"
-                                                    max="500"
-                                                    step="0.01"
-                                                />
+                                            <div>
+                                                <label className=" text-sm font-medium text-gray-700 mb-2">
+                                                    Presión Arterial
+                                                </label>
+                                                <div className="relative">
+                                                    <FaHeartbeat className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#5FAAD9]" />
+                                                    <input
+                                                        type="text"
+                                                        value={formData.presion_arterial}
+                                                        onChange={(e) => setFormData({ ...formData, presion_arterial: e.target.value })}
+                                                        placeholder="Ej: 120/80"
+                                                        className="pl-10 w-full p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#5FAAD9] focus:border-transparent shadow-sm"
+                                                        required
+                                                    />
+                                                </div>
                                             </div>
-                                        </div>
 
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Estatura (cm)
-                                            </label>
-                                            <div className="relative">
-                                                <FaRuler className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                                                <input
-                                                    type="number"
-                                                    value={formData.estatura}
-                                                    onChange={(e) => setFormData({ ...formData, estatura: e.target.value })}
-                                                    placeholder="Estatura en cm"
-                                                    className="pl-10 w-full p-2 border rounded-lg focus:ring-2 focus:ring-primary"
-                                                    required
-                                                    min="0"
-                                                    max="300"
-                                                    step="0.01"
-                                                />
+                                            <div>
+                                                <label className=" text-sm font-medium text-gray-700 mb-2">
+                                                    Peso (kg)
+                                                </label>
+                                                <div className="relative">
+                                                    <FaWeight className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#5FAAD9]" />
+                                                    <input
+                                                        type="number"
+                                                        value={formData.peso}
+                                                        onChange={(e) => setFormData({ ...formData, peso: e.target.value })}
+                                                        placeholder="Peso en kg"
+                                                        className="pl-10 w-full p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#5FAAD9] focus:border-transparent shadow-sm"
+                                                        required
+                                                        min="0"
+                                                        max="500"
+                                                        step="0.01"
+                                                    />
+                                                </div>
                                             </div>
-                                        </div>
 
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Temperatura (°C)
-                                            </label>
-                                            <div className="relative">
-                                                <FaThermometerHalf className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                                                <input
-                                                    type="number"
-                                                    value={formData.temperatura}
-                                                    onChange={(e) => setFormData({ ...formData, temperatura: e.target.value })}
-                                                    placeholder="Temperatura en °C"
-                                                    className="pl-10 w-full p-2 border rounded-lg focus:ring-2 focus:ring-primary"
-                                                    step="0.1"
-                                                    min="35"
-                                                    max="42"
-                                                />
+                                            <div>
+                                                <label className=" text-sm font-medium text-gray-700 mb-2">
+                                                    Estatura (cm)
+                                                </label>
+                                                <div className="relative">
+                                                    <FaRuler className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#5FAAD9]" />
+                                                    <input
+                                                        type="number"
+                                                        value={formData.estatura}
+                                                        onChange={(e) => setFormData({ ...formData, estatura: e.target.value })}
+                                                        placeholder="Estatura en cm"
+                                                        className="pl-10 w-full p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#5FAAD9] focus:border-transparent shadow-sm"
+                                                        required
+                                                        min="0"
+                                                        max="300"
+                                                        step="0.01"
+                                                    />
+                                                </div>
                                             </div>
-                                        </div>
 
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Nivel de Glucosa
-                                            </label>
-                                            <div className="relative">
-                                                <FaTint className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                                                <input
-                                                    type="number"
-                                                    value={formData.nivel_glucosa}
-                                                    onChange={(e) => setFormData({ ...formData, nivel_glucosa: e.target.value })}
-                                                    placeholder="Nivel de glucosa"
-                                                    className="pl-10 w-full p-2 border rounded-lg focus:ring-2 focus:ring-primary"
-                                                    min="0"
-                                                    step="0.1"
-                                                />
+                                            <div>
+                                                <label className=" text-sm font-medium text-gray-700 mb-2">
+                                                    Temperatura (°C)
+                                                </label>
+                                                <div className="relative">
+                                                    <FaThermometerHalf className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#5FAAD9]" />
+                                                    <input
+                                                        type="number"
+                                                        value={formData.temperatura}
+                                                        onChange={(e) => setFormData({ ...formData, temperatura: e.target.value })}
+                                                        placeholder="Temperatura en °C"
+                                                        className="pl-10 w-full p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#5FAAD9] focus:border-transparent shadow-sm"
+                                                        step="0.1"
+                                                        min="35"
+                                                        max="42"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label className=" text-sm font-medium text-gray-700 mb-2">
+                                                    Nivel de Glucosa
+                                                </label>
+                                                <div className="relative">
+                                                    <FaTint className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#5FAAD9]" />
+                                                    <input
+                                                        type="number"
+                                                        value={formData.nivel_glucosa}
+                                                        onChange={(e) => setFormData({ ...formData, nivel_glucosa: e.target.value })}
+                                                        placeholder="Nivel de glucosa"
+                                                        className="pl-10 w-full p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#5FAAD9] focus:border-transparent shadow-sm"
+                                                        min="0"
+                                                        step="0.1"
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    {/* Description Section */}
+                                    <div className="bg-[#F8FAFC] p-4 rounded-lg border border-gray-200">
+                                        <label className=" text-sm font-medium text-gray-700 mb-2">
                                             Descripción
                                         </label>
                                         <div className="relative">
-                                            <FaNotesMedical className="absolute left-3 top-3 text-gray-400" />
+                                            <FaNotesMedical className="absolute left-3 top-3 text-[#5FAAD9]" />
                                             <textarea
                                                 value={formData.descripcion}
                                                 onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
                                                 placeholder="Observaciones y notas adicionales"
-                                                className="pl-10 w-full p-2 border rounded-lg focus:ring-2 focus:ring-primary"
+                                                className="pl-10 w-full p-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#5FAAD9] focus:border-transparent shadow-sm"
                                                 rows={4}
                                             />
                                         </div>
                                     </div>
 
+                                    {/* Action Buttons */}
                                     <div className="flex justify-end space-x-4 mt-6">
                                         <button
                                             type="button"
                                             onClick={onClose}
-                                            className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                                            className="px-6 py-3 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
                                         >
                                             Cancelar
                                         </button>
                                         <button
                                             type="submit"
                                             disabled={isLoading}
-                                            className={`px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors ${isLoading ? 'opacity-50 cursor-not-allowed' : ''
-                                                }`}
+                                            className={`px-6 py-3 text-white bg-[#5FAAD9] rounded-lg hover:bg-[#035AA6] transition-colors font-medium shadow-md ${
+                                                isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                                            }`}
                                         >
-                                            {isLoading ? 'Guardando...' : historialToEdit ? 'Actualizar' : 'Registrar'}
+                                            {isLoading ? (
+                                                <div className="flex items-center">
+                                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                                    {historialToEdit ? 'Actualizando...' : 'Registrando...'}
+                                                </div>
+                                            ) : (
+                                                historialToEdit ? 'Actualizar' : 'Registrar'
+                                            )}
                                         </button>
                                     </div>
                                 </form>
