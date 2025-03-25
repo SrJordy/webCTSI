@@ -15,7 +15,9 @@ import {
     FaUserAlt, 
     FaUserMd,
     FaClipboardList,
-    FaTimes
+    FaTimes,
+    FaCheck,
+    FaClock
 } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import MainLayout from "../layouts/MainLayout";
@@ -38,6 +40,7 @@ const CitasPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [isFiltersVisible, setIsFiltersVisible] = useState(false);
     const [filterDate, setFilterDate] = useState("");
+    const [statusFilter, setStatusFilter] = useState<'todos' | 'completadas' | 'pendientes'>('todos');
     const itemsPerPage = 9;
 
     const formatDateTime = (dateString: string) => {
@@ -69,7 +72,6 @@ const CitasPage = () => {
             setIsLoading(false);
         }
     };
-
     const filteredCitas = useMemo(() => {
         return citas.filter((cita) => {
             const searchTermLower = searchTerm.toLowerCase().trim();
@@ -86,10 +88,21 @@ const CitasPage = () => {
             if (filterDate) {
                 matchesDate = formatDateForFilter(cita.fechahora) === filterDate;
             }
+
+            let matchesStatus = true;
+            if (statusFilter !== 'todos') {
+                const citaDate = new Date(cita.fechahora);
+                const now = new Date();
+                if (statusFilter === 'completadas') {
+                    matchesStatus = citaDate < now;
+                } else {
+                    matchesStatus = citaDate >= now;
+                }
+            }
             
-            return matchesSearch && matchesDate;
+            return matchesSearch && matchesDate && matchesStatus;
         });
-    }, [citas, searchTerm, filterDate]);
+    }, [citas, searchTerm, filterDate, statusFilter]);
 
     const paginatedCitas = useMemo(() => {
         const startIndex = (currentPage - 1) * itemsPerPage;
@@ -98,13 +111,11 @@ const CitasPage = () => {
 
     const totalPages = Math.ceil(filteredCitas.length / itemsPerPage);
 
-    // Función para abrir el modal de nueva cita
     const handleOpenNewCitaModal = useCallback(() => {
         setCitaToEdit(null);
         setIsModalOpen(true);
     }, []);
 
-    // Función para abrir el modal de edición
     const handleEdit = useCallback((cita: Cita) => {
         setCitaToEdit({
             ...cita,
@@ -113,17 +124,13 @@ const CitasPage = () => {
         setIsModalOpen(true);
     }, []);
 
-    // Función para abrir el modal de visualización
     const handleView = useCallback((cita: Cita) => {
         setCitaToView(cita);
         setIsViewModalOpen(true);
     }, []);
 
-    // Función para cerrar el modal de cita y limpiar el estado
     const handleCloseCitaModal = useCallback(() => {
         setIsModalOpen(false);
-        // Importante: Limpiar el estado después de un pequeño retraso
-        // para evitar problemas de renderizado
         setTimeout(() => {
             setCitaToEdit(null);
         }, 100);
@@ -142,7 +149,6 @@ const CitasPage = () => {
             }
         }
     };
-
     const exportToCSV = () => {
         const headers = ["Fecha y Hora", "Lugar", "Motivo", "Paciente", "Profesional"];
         const csvContent = [
@@ -170,9 +176,9 @@ const CitasPage = () => {
     const clearFilters = () => {
         setSearchTerm("");
         setFilterDate("");
+        setStatusFilter("todos");
     };
 
-    // Función para manejar el envío exitoso del formulario
     const handleCitaSubmit = useCallback(() => {
         fetchCitas();
         handleCloseCitaModal();
@@ -294,7 +300,50 @@ const CitasPage = () => {
                                         </motion.button>
                                     </div>
                                 </div>
-                                <div className="flex justify-end">
+
+                                {/* Botones de estado */}
+                                <div className="flex justify-between items-center mt-4 border-t pt-4">
+                                    <div className="flex gap-2">
+                                        <motion.button
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
+                                            onClick={() => setStatusFilter('todos')}
+                                            className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+                                                statusFilter === 'todos'
+                                                    ? 'bg-[#5FAAD9] text-white'
+                                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                            }`}
+                                        >
+                                            <FaCalendarAlt size={14} />
+                                            Todas
+                                        </motion.button>
+                                        <motion.button
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
+                                            onClick={() => setStatusFilter('completadas')}
+                                            className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+                                                statusFilter === 'completadas'
+                                                    ? 'bg-green-500 text-white'
+                                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                            }`}
+                                        >
+                                            <FaCheck size={14} />
+                                            Completadas
+                                        </motion.button>
+                                        <motion.button
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
+                                            onClick={() => setStatusFilter('pendientes')}
+                                            className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+                                                statusFilter === 'pendientes'
+                                                    ? 'bg-yellow-500 text-white'
+                                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                            }`}
+                                        >
+                                            <FaClock size={14} />
+                                            Pendientes
+                                        </motion.button>
+                                    </div>
                                     <button
                                         onClick={clearFilters}
                                         className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center"
@@ -306,7 +355,6 @@ const CitasPage = () => {
                             </motion.div>
                         )}
                     </AnimatePresence>
-
                     {/* Contenido principal */}
                     <motion.div
                         initial={{ y: 20, opacity: 0 }}
@@ -323,11 +371,11 @@ const CitasPage = () => {
                                 <FaCalendarAlt className="mx-auto text-gray-300 text-5xl mb-4" />
                                 <h3 className="text-xl font-medium text-gray-700 mb-2">No se encontraron citas</h3>
                                 <p className="text-gray-500 mb-6">
-                                    {searchTerm || filterDate
+                                    {searchTerm || filterDate || statusFilter !== 'todos'
                                         ? 'No hay citas que coincidan con los filtros aplicados'
                                         : 'No hay citas registradas en el sistema'}
                                 </p>
-                                {(searchTerm || filterDate) ? (
+                                {(searchTerm || filterDate || statusFilter !== 'todos') ? (
                                     <button
                                         onClick={clearFilters}
                                         className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
@@ -361,10 +409,21 @@ const CitasPage = () => {
                                                     <FaCalendarAlt className="mr-2" />
                                                     Cita #{cita.cod_cita}
                                                 </h3>
-                                                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full flex items-center">
-                                                    <FaCalendarAlt className="mr-1" size={10} />
-                                                    {formatDateTime(cita.fechahora)}
+                                                <span className={`text-xs px-2 py-1 rounded-full flex items-center ${
+                                                    new Date(cita.fechahora) < new Date()
+                                                        ? 'bg-green-100 text-green-800'
+                                                        : 'bg-yellow-100 text-yellow-800'
+                                                }`}>
+                                                    {new Date(cita.fechahora) < new Date() ? (
+                                                        <><FaCheck className="mr-1" size={10} />Completada</>
+                                                    ) : (
+                                                        <><FaClock className="mr-1" size={10} />Pendiente</>
+                                                    )}
                                                 </span>
+                                            </div>
+                                            <div className="mt-2 text-sm text-gray-600">
+                                                <FaCalendarAlt className="inline mr-1" size={10} />
+                                                {formatDateTime(cita.fechahora)}
                                             </div>
                                         </div>
                                         
@@ -391,7 +450,6 @@ const CitasPage = () => {
                                                         : "No disponible"}
                                                 </p>
                                             </div>
-                                            
                                             {/* Información del profesional */}
                                             <div className="mb-4 bg-gray-50 p-3 rounded-lg">
                                                 <div className="flex items-center mb-2">
@@ -458,7 +516,6 @@ const CitasPage = () => {
                             </div>
                         )}
                     </motion.div>
-
                     {/* Paginación */}
                     {totalPages > 1 && (
                         <div className="flex justify-center mt-8 mb-4">
@@ -518,7 +575,6 @@ const CitasPage = () => {
                     message="¿Está seguro que desea eliminar esta cita? Esta acción no se puede deshacer."
                 />
 
-                {/* Usamos una clave única para forzar la recreación del componente */}
                 <CitaModal
                     key={citaToEdit ? `edit-${citaToEdit.cod_cita}` : 'new-cita'}
                     isOpen={isModalOpen}

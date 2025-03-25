@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
-import { createCita,updateCita } from '../service/citeService';
+import { createCita, updateCita } from '../service/citeService';
 import { FaTimes, FaClock, FaMapMarkerAlt, FaClipboardList, FaUser, FaUserMd } from 'react-icons/fa';
 import SelectPersonaModal from './SelectPatientModal';
 import SelectProfesionalModal from './SelectProfesionalModal';
@@ -32,26 +32,47 @@ interface CitaModalProps {
 }
 
 const CitaModal: React.FC<CitaModalProps> = ({ isOpen, onClose, onSubmit, cita }) => {
-    const [formData, setFormData] = useState({
+    const initialFormState = {
         fechahora: '',
         lugar: '',
         motivo: '',
         persona_id: 0,
         profesional_id: 0
-    });
-
-    const toLocalISOString = (dateString: string) => {
-        const date = new Date(dateString);
-        date.setHours(date.getHours() - 5); 
-        const pad = (num: number) => num.toString().padStart(2, '0');
-        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
     };
-    
 
-    const [displayData, setDisplayData] = useState({
+    const [formData, setFormData] = useState(initialFormState);
+
+    const lugaresQuevedo = [
+        "Hospital IESS Quevedo",
+        "Hospital Sagrado Corazón de Jesús",
+        "Clínica San Antonio",
+        "Clínica Metropolitana",
+        "Centro Médico Quevedo",
+        "Hospital General Quevedo",
+        "Clínica Santa Marianita",
+        "Centro de Salud Quevedo Norte",
+        "Centro de Salud Quevedo Sur",
+        "Clínica San José",
+        "Hospital Básico Quevedo",
+        "Centro Médico Familiar",
+        "Policlínico Municipal de Quevedo",
+        "Clínica Vida Sana",
+        "Centro de Especialidades Médicas"
+    ];
+
+    const [showLugaresSugeridos, setShowLugaresSugeridos] = useState(false);
+    const [lugaresFiltrados, setLugaresFiltrados] = useState<string[]>([]);
+    const [correccionSugerida, setCorreccionSugerida] = useState<string | null>(null);
+    const lugarInputRef = useRef<HTMLInputElement>(null);
+    const [mostrarCorreccion, setMostrarCorreccion] = useState(false);
+
+    
+    const initialDisplayState = {
         paciente: '',
         profesional: ''
-    });
+    };
+
+    const [displayData, setDisplayData] = useState(initialDisplayState);
 
     const [showSelectPersonaModal, setShowSelectPersonaModal] = useState(false);
     const [showSelectProfesionalModal, setShowSelectProfesionalModal] = useState(false);
@@ -62,7 +83,7 @@ const CitaModal: React.FC<CitaModalProps> = ({ isOpen, onClose, onSubmit, cita }
     useEffect(() => {
         if (cita) {
             setFormData({
-                fechahora: new Date(cita.fechahora).toISOString().slice(0, 16),
+                fechahora: cita.fechahora ? new Date(cita.fechahora).toISOString().slice(0, 16) : '',
                 lugar: cita.lugar,
                 motivo: cita.motivo,
                 persona_id: cita.persona_id,
@@ -72,8 +93,114 @@ const CitaModal: React.FC<CitaModalProps> = ({ isOpen, onClose, onSubmit, cita }
                 paciente: cita.persona ? `${cita.persona.nombre} ${cita.persona.apellido}` : '',
                 profesional: cita.profesional ? `${cita.profesional.nombre} ${cita.profesional.apellido}` : ''
             });
+        } else {
+            setFormData(initialFormState);
+            setDisplayData(initialDisplayState);
         }
-    }, [cita]);
+    }, [cita, isOpen]);
+
+    const handleClose = () => {
+        setFormData(initialFormState);
+        setDisplayData(initialDisplayState);
+        setError('');
+        setCorreccionSugerida(null);
+        setMostrarCorreccion(false);
+        setShowLugaresSugeridos(false);
+        onClose();
+    };
+
+    const calcularSimilitud = (s1: string, s2: string): number => {
+        s1 = s1.toLowerCase();
+        s2 = s2.toLowerCase();
+        
+        const costos: number[] = new Array(s2.length + 1);
+        for (let i = 0; i <= s1.length; i++) {
+            let ultimoValor = i;
+            for (let j = 0; j <= s2.length; j++) {
+                if (i === 0) {
+                    costos[j] = j;
+                } else if (j > 0) {
+                    let nuevoValor = costos[j - 1];
+                    if (s1.charAt(i - 1) !== s2.charAt(j - 1)) {
+                        nuevoValor = Math.min(
+                            nuevoValor,
+                            ultimoValor,
+                            costos[j]
+                        ) + 1;
+                    }
+                    costos[j - 1] = ultimoValor;
+                    ultimoValor = nuevoValor;
+                }
+            }
+            if (i > 0) {
+                costos[s2.length] = ultimoValor;
+            }
+        }
+        return costos[s2.length];
+    };
+
+    const encontrarMejorCoincidencia = (texto: string): string | null => {
+        if (!texto || texto.trim().length < 3) return null;
+        
+        let mejorCoincidencia = null;
+        let menorDistancia = Infinity;
+        
+        for (const lugar of lugaresQuevedo) {
+            if (lugar.toLowerCase().includes(texto.toLowerCase())) {
+                return lugar;
+            }
+            
+            const distancia = calcularSimilitud(texto, lugar);
+            const umbralSimilitud = Math.floor(lugar.length * 0.3);
+            
+            if (distancia < menorDistancia && distancia <= umbralSimilitud) {
+                menorDistancia = distancia;
+                mejorCoincidencia = lugar;
+            }
+        }
+        
+        return mejorCoincidencia;
+    };
+
+    useEffect(() => {
+        if (formData.lugar.trim() === '') {
+            setLugaresFiltrados([]);
+            setCorreccionSugerida(null);
+            setMostrarCorreccion(false);
+            return;
+        }
+
+        const filtrados = lugaresQuevedo.filter(lugar => 
+            lugar.toLowerCase().includes(formData.lugar.toLowerCase())
+        );
+        setLugaresFiltrados(filtrados);
+        
+        if (filtrados.length === 0) {
+            const mejorCoincidencia = encontrarMejorCoincidencia(formData.lugar);
+            setCorreccionSugerida(mejorCoincidencia);
+            setMostrarCorreccion(!!mejorCoincidencia);
+        } else {
+            setCorreccionSugerida(null);
+            setMostrarCorreccion(false);
+        }
+    }, [formData.lugar]);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (lugarInputRef.current && !lugarInputRef.current.contains(event.target as Node)) {
+                setShowLugaresSugeridos(false);
+                
+                if (correccionSugerida && formData.lugar.trim() !== '') {
+                    setMostrarCorreccion(true);
+                }
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [correccionSugerida, formData.lugar]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -84,16 +211,17 @@ const CitaModal: React.FC<CitaModalProps> = ({ isOpen, onClose, onSubmit, cita }
             return;
         }
     
-        const adjustedDate = new Date(formData.fechahora);
-        adjustedDate.setHours(adjustedDate.getHours()); 
-    
-        const citaData = { ...formData, fechahora: adjustedDate.toISOString() };
-    
         try {
             setIsLoading(true);
+            const fechaSeleccionada = new Date(formData.fechahora);
+            const citaData = { 
+                ...formData, 
+                fechahora: fechaSeleccionada.toISOString() 
+            };
             if (cita?.cod_cita) {
                 await updateCita(cita.cod_cita, citaData);
             } else {
+                console.log(citaData);
                 await createCita(citaData);
             }
             setShowSuccessModal(true);
@@ -105,7 +233,6 @@ const CitaModal: React.FC<CitaModalProps> = ({ isOpen, onClose, onSubmit, cita }
         }
     };
     
-
     interface Persona {
         cod_paciente: number;
         nombre: string;
@@ -143,6 +270,25 @@ const CitaModal: React.FC<CitaModalProps> = ({ isOpen, onClose, onSubmit, cita }
         setShowSelectProfesionalModal(false);
     };
 
+    const handleLugarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData(prev => ({...prev, lugar: e.target.value}));
+        setShowLugaresSugeridos(true);
+        setMostrarCorreccion(false);
+    };
+
+    const handleLugarSelect = (lugar: string) => {
+        setFormData(prev => ({...prev, lugar}));
+        setShowLugaresSugeridos(false);
+        setMostrarCorreccion(false);
+    };
+
+    const aplicarCorreccion = () => {
+        if (correccionSugerida) {
+            setFormData(prev => ({...prev, lugar: correccionSugerida}));
+            setMostrarCorreccion(false);
+        }
+    };
+
     return (
         <AnimatePresence>
             {isOpen && (
@@ -162,7 +308,7 @@ const CitaModal: React.FC<CitaModalProps> = ({ isOpen, onClose, onSubmit, cita }
                                     {cita ? 'Editar Cita' : 'Nueva Cita'}
                                 </h2>
                             </div>
-                            <button onClick={onClose} className="text-white hover:text-gray-200">
+                            <button onClick={handleClose} className="text-white hover:text-gray-200">
                                 <FaTimes className="w-5 h-5" />
                             </button>
                         </div>
@@ -179,7 +325,7 @@ const CitaModal: React.FC<CitaModalProps> = ({ isOpen, onClose, onSubmit, cita }
                                         </div>
                                         <input
                                             type="datetime-local"
-                                            value={formData.fechahora ? toLocalISOString(formData.fechahora):''}
+                                            value={formData.fechahora}
                                             onChange={(e) => setFormData(prev => ({...prev, fechahora: e.target.value}))}
                                             className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5FAAD9] focus:border-transparent"
                                             required
@@ -250,16 +396,50 @@ const CitaModal: React.FC<CitaModalProps> = ({ isOpen, onClose, onSubmit, cita }
                                             <div className="bg-[#5FAAD9] p-1.5 rounded-full shadow">
                                                 <FaMapMarkerAlt className="w-4 h-4 text-white" />
                                             </div>
-                                            <h3 className="text-base font-semibold text-[#035AA6]">Lugar</h3>
+                                            <h3 className="text-base font-semibold text-[#035AA6]">Ubicación</h3>
                                         </div>
-                                        <input
-                                            type="text"
-                                            value={formData.lugar}
-                                            onChange={(e) => setFormData(prev => ({...prev, lugar: e.target.value}))}
-                                            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5FAAD9] focus:border-transparent"
-                                            placeholder="Ingrese el lugar de la cita"
-                                            required
-                                        />
+                                        <div className="relative" ref={lugarInputRef}>
+                                            <input
+                                                type="text"
+                                                value={formData.lugar}
+                                                onChange={handleLugarChange}
+                                                onFocus={() => setShowLugaresSugeridos(true)}
+                                                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5FAAD9] focus:border-transparent"
+                                                placeholder="Ingrese la ubicación de la cita"
+                                                required
+                                            />
+                                            {showLugaresSugeridos && lugaresFiltrados.length > 0 && (
+                                                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                                    {lugaresFiltrados.map((lugar, index) => (
+                                                        <div 
+                                                            key={index}
+                                                            className="p-2 hover:bg-gray-100 cursor-pointer"
+                                                            onClick={() => handleLugarSelect(lugar)}
+                                                        >
+                                                            {lugar}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                            
+                                            {/* Mensaje de corrección sugerida */}
+                                            {mostrarCorreccion && correccionSugerida && (
+                                                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-3">
+                                                    <p className="text-sm text-gray-600 mb-2">
+                                                        ¿Quisiste decir?
+                                                    </p>
+                                                    <div 
+                                                        className="p-2 bg-blue-50 text-blue-700 rounded-md cursor-pointer hover:bg-blue-100 flex justify-between items-center"
+                                                        onClick={aplicarCorreccion}
+                                                    >
+                                                        <span className="font-medium">{correccionSugerida}</span>
+                                                        <span className="text-xs bg-blue-200 px-2 py-1 rounded-full">
+                                                            Aplicar
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
 
@@ -292,7 +472,7 @@ const CitaModal: React.FC<CitaModalProps> = ({ isOpen, onClose, onSubmit, cita }
                             <div className="mt-6 flex justify-end space-x-3">
                                 <button
                                     type="button"
-                                    onClick={onClose}
+                                    onClick={handleClose}
                                     className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
                                     disabled={isLoading}
                                 >
@@ -336,7 +516,7 @@ const CitaModal: React.FC<CitaModalProps> = ({ isOpen, onClose, onSubmit, cita }
                         onClose={() => {
                             setShowSuccessModal(false);
                             onSubmit();
-                            onClose();
+                            handleClose();
                         }}
                         message={cita ? "Cita actualizada exitosamente" : "Cita creada exitosamente"}
                     />

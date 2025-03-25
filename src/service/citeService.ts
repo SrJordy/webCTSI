@@ -1,5 +1,6 @@
 import axios from "axios";
 import { Cita } from "../assets/Cita";
+import { getUser } from "./UserService";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -48,12 +49,20 @@ export const createCita = async (
         };
         const formattedDate = fechaCita.toLocaleString("es-EC", options);
         const dispositivoData = await getDispositivoId(cita.persona_id);
+        
+        const profesionalData = await getUser({ id: cita.profesional_id });
+        
+        console.log(dispositivoData);
         if (!dispositivoData) {
             throw new Error("No se pudo obtener los datos del dispositivo");
         }
         const playerId = dispositivoData.persona?.cuidador?.dispositivo_id || "";
         const nombrePaciente = `${dispositivoData.persona?.nombre || ""} ${dispositivoData.persona?.apellido || ""}`;
-        const nombreProfesional = `${dispositivoData.profesion?.nombre || ""} ${dispositivoData.profesion?.apellido || ""}`;
+        
+        const nombreProfesional = profesionalData ? 
+            `${profesionalData.nombre || ""} ${profesionalData.apellido || ""}` : 
+            "profesional asignado";
+            
         const notificacionData: NotificacionData = {
             type: "scheduled",
             title: "Cita programada",
@@ -61,6 +70,7 @@ export const createCita = async (
             playerId: playerId,
             scheduledTime: fechaCita.toISOString(),
         };
+        console.log(notificacionData);
         await createNotificacion(notificacionData);
         return cita;
     } catch (error) {
